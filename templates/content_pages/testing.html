@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing</title>
+
+
+</head>
+<body>
+  <!-- Create table that shows each testing case, drop-down instructions, and allows the user to start the test -->
+  <table id="test-table">
+    <thead>
+        <td>Test</td>
+        <td>Status</td>
+        <td></td>
+    </thead>
+      
+    <tbody>
+      <!-- Nest two rows in one to give the illusion of one row with a spanned column for test guidelines -->
+      
+      <tr> <!-- Starting Survey -->
+        <td class="test-table-test-name">APDA Healthcare Survey</td>
+        <td class="test-status" id="survey-status">Incomplete</td>
+        <td>
+          <button id="start-survey-button" clicked="false">Start Test</button>
+        </td>
+      </tr>
+      <tr>
+        <!-- Testing guidelines for hand motion test -->
+        <td class="divided-row" colspan="3">
+          <!-- Drop-down text to show testing guidelines -->
+          <details class="test-details" id="survey-details">
+            <summary><b>Click for APDA Healthcare Survey Guidelines</b></summary>
+            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+          </details>
+        </td>
+      </tr>
+      
+      <tr> <!-- Hand Motion Test -->
+        <td class="test-table-test-name">Hand Motion</td>
+        <td class="test-status" id="handmotion-status">Incomplete</td>
+        <td>
+          <button id="start-handmotion-button" clicked="false">Start Test</button>
+        </td>
+      </tr>
+      <tr>
+        <!-- Testing guidelines for hand motion test -->
+        <td class="divided-row" colspan="3">
+          <!-- Drop-down text to show testing guidelines -->
+          <details class="test-details" id="handmotion-details">
+            <summary><b>Click for Hand Motion Test gidelines</b></summary>
+            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+          </details>
+        </td>
+      </tr>
+
+
+      <tr> <!-- Speech Test -->
+        <td class="test-table-test-name">Speech</td>
+        <td class="test-status" id="speech-status">Incomplete</td>
+        <td>
+          <button id="start-speech-button" clicked="false">Start Test</button>
+        </td>
+      </tr>
+      <tr>
+        <!-- Testing guidelines for speech test -->
+        <td class="divided-row" colspan="3">
+          <!-- Drop-down text to show testing guidelines -->
+          <details class="test-details" id="speech-details">
+            <summary><b>Click for Speech Test gidelines</b></summary>
+            <ol>
+              <li>Ensure the test is being conducted in a quiet environment, and click the "Start Test" button.</li>
+              <li>The patient will be instructed to wait in silence for approximately 5 seconds. Ensure little to no sounds occur during this time, as the system is calibrating to background noise levels.</li>
+              <li>The patient will be instructed to hold a vowel for a set period of time.</li>
+            </ol>
+          </details>
+        </td>
+      </tr>
+
+
+      <tr> <!-- Tremor Test -->
+        <td class="test-table-test-name">Tremor</td>
+        <td class="test-status" id="tremor-status">Incomplete</td>
+        <td>
+          <button id="start-tremor-button" clicked="false">Start Test</button>
+        </td>
+      </tr>
+      <tr>
+        <!-- Testing guidelines for tremor test -->
+        <td colspan="3">                <!-- This row does not have the "divided-row" class so the bottom border doesn't appear -->
+          <!-- Drop-down text to show testing guidelines -->
+          <details class="test-details" id="tremor-details">
+            <summary><b>Click for Tremor Test gideline</b></summary>
+            <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.</p>
+          </details>
+        </td>
+      </tr>
+    </tbody>
+        
+  </table>
+  <div id="analyze-button-div">
+    <button id="run-algorithm-button">Analyze Test Results</button>
+  </div>
+      
+  <!-- Modal to confirm that the user wants to delete old patient test file and create a new one -->
+  <div id="confirm-restart-test" class="modal">
+    <div id="confirm-restart-content" class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2>Are you sure you want to restart the test?</h2>
+                <h4>This will erase all previous test data.</h4>
+            </div>
+            <span id="close-restart-modal" class="close">&times;</span>  <!-- Place in "X" to close window-->
+        </div>
+        <div id="confirm-restart-panel">
+            <button id="confirm-restart-panel-yes" class="confirm-restart-button">Yes</button>
+            <button id="confirm-restart-panel-no" class="confirm-restart-button">No</button>
+        </div>
+    </div>
+</div>
+
+
+</body>
+  
+</html>

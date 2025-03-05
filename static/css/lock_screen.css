@@ -1,0 +1,125 @@
+/* Import colours from constants.css */
+@import url(constants.css);
+
+body{
+    background: radial-gradient(var(--bg), var(--bg2), var(--bg3));
+}
+html{
+    margin: 0px;
+}
+
+
+/* Position lock logo to be centered about input modal */
+#logo-lock-div{
+    margin: 8vh auto 1vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#company-logo{
+    margin-left: 6vh;
+    height: 15vh;
+}
+
+#lock-logo{
+    position: absolute; /* Allows it to stay in the center */
+    left: 50%;
+    transform: translateX(-50%);
+    height: 20vh;
+}
+
+/* Create modal to hold input values and login button */
+#login-modal{
+    background-color: var(--bg);
+    border: 4px solid var(--button);
+    border-radius: 3vh;
+    margin: 5vh auto 10vh;
+    padding: 30px 40px;
+    width: 40%;
+    /* box-shadow: 2px 3px 3px var(--bg2); */
+}  
+
+
+/* "Please enteryour login credentials" statement */
+h1{
+    color: var(--button-active);
+    text-align: center;
+}
+
+/* Control positions of divs for both username and password */
+.user-pass-div{
+    display: flex;
+    align-items: center;
+}
+
+.input-word{
+    flex-grow: 1;
+}
+
+/* Control position of "User" and "Password" words */
+h4{
+    text-align: right;
+    font-size:3vh;
+}
+
+/* Control styling of input boxes */
+input{
+    height: 5vh;
+    width: 60%;
+    font-size:2.5vh;
+    margin: 1vh;
+    margin-right: 6vh;
+}
+
+/* Change shadow colour when an input box is in use */
+input:focus{outline: 2px solid var(--button-accent);}
+
+#login-div{
+    display: flex;
+    justify-content: center;
+    margin: 3vh auto 0vh;
+
+}
+
+button{
+    height: 7vh;
+    width: 20vh;
+    background-color: var(--button);
+    border: 2px solid var(--button-accent);
+    border-radius: 5vh;
+    color: var(--whitefont);
+    font-size: 2.8vh;
+}
+
+/* Control button behaviour when hovering/clicking on it */
+button:hover{
+    background-color: var(--button-accent);
+    border: 2px solid var(--button-active);
+    cursor: pointer;
+}
+
+button:focus{
+    background-color: var(--button-accent);
+    border: 2px solid var(--button-active);
+}
+
+button:active{background-color: var(--button-active);}
+
+button:disabled{
+    background-color: var(--bg1);
+    color: var(--bg2);
+    border: 2px solid var(--bg2);
+}
+
+/* Toggle password visibility button */
+#toggle-visibility-icon{
+    color: var(--button-active);
+    position: absolute;
+    left: 68%;
+}
+
+#toggle-visibility-icon:hover, #toggle-visibility-icon:focus {
+    text-decoration: none;
+    cursor: pointer;
+}

@@ -1,0 +1,44 @@
+<!-- Not in use yet! Will be fore the patietn info button! -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/patient_info.css">
+
+    <title>Patient Info</title>
+</head>
+<body>
+    <form method="post" action="/create_new_patient">
+        <div class=info-form>
+            <h4>First Name</h4>    
+            <input id="fname" type="text" placeholder="First Name" required>
+    
+            <h4>Last Name</h4>    
+            <input id="lname" type="text" placeholder="Last Name" required>
+            
+            <h4>Date of Birth</h4>    
+            <input id="dob" type="date" required>
+        
+            <h4>Sex</h4>    
+            <input id="sex" type="text" placeholder="Sex" required>
+            
+            <h4>Attending Physician</h4>    
+            <input id="attending" type="text" placeholder="Attending Physician" required>
+        </div>
+        
+        <div id="photo-upload-div">
+            <label>Upload Patient Photo</label>
+            <input id="photo-upload" type="file">
+        </div>
+
+        <div id="info-submit">
+            <input id="update-patient-info" type="submit" value="Update" disabled>
+        </div>
+    </form>
+
+    <script src="../static/js/new_patient_input.js"></script>
+
+</body>
+</html>

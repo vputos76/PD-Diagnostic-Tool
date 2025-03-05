@@ -1,0 +1,21 @@
+/* Define constant colours */
+:root{
+    --bg: #eaecee;
+    --bg2: #cdcecf;
+    --bg3: #3c9197;
+    --error-bg: #cb8989;
+    --button: #27969e;
+    --button-accent: #0d525a;
+    --button-active: #0a3d40;
+    --close-patient: #780000;
+    --close-patient-accent: #690707;
+    --close-patient-active: #3b0303;
+    --new-patient: #d5930f;
+    --new-patient-accent: #a16e08;
+    --new-patient-active: #815705;
+    --open-patient: #01710c;
+    --open-patient-accent: #035d0c;
+    --open-patient-active: #024308;
+    --whitefont: #f5f7f8;
+    --transTime: 0.2s;
+}

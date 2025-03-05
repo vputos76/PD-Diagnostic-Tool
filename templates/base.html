@@ -1,0 +1,97 @@
+<!-- Base template that renders when flask creates the webpage -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/patient_modal.css">
+    <link rel="stylesheet" href="../static/css/testing.css">
+    <link rel="icon" type="image/x-icon" href="../static/images/test_logo.ico">
+
+    <style>
+        /* Remove all padding and margins in this document to promote full-screen width of headers/footer/content divs */
+        body, html{
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%
+        }
+
+        #base-header-div{padding-bottom: 44vh;}
+        
+        #base-content-div{padding: 5px 30px;flex-grow: 1;}
+
+        </style>
+
+</head>
+<body>
+    <div class="body-content" id="base-header-div">
+        {% include 'header.html' %}
+    </div>
+
+    <div class="body-content" id="base-content-div">
+        {% include 'content_pages/none_selected.html' %}
+    </div>
+
+    <footer class="body-content">
+        {% include 'footer.html' %}
+    </footer>
+</body>
+
+    <script>
+        // Run when clicking buttons
+        document.addEventListener("click", updateScroll);
+
+        // Add event listener to button that confirms closing patient to reset the background screen to remove functionality
+        const resetPatient = document.getElementById("confirm-close-panel-yes")
+        resetPatient.addEventListener("dblclick", function(){
+            fetchContent('content_pages/none_selected.html')});
+
+
+        const observer = new MutationObserver(updateScroll);
+        const modals = document.querySelectorAll(".modal");
+
+        // Observe each modal for changes in attributes (like "style" changes)
+        modals.forEach(modal => {
+            observer.observe(modal, { attributes: true, attributeFilter: ["style"] });
+        });
+
+        // After the web page has loaded, allow control-buttons class to change the page loaded in base.html
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".control-buttons").forEach(button => {
+                button.addEventListener("click", function () {
+                    let page = this.getAttribute("data-page"); // Get the page to load
+                    let pageScript = this.getAttribute("page-script"); // Get the page to load
+                    fetchContent(page, pageScript);
+                }); }); });
+
+
+        function updateScroll() {
+            let anyModalVisible = Array.from(document.querySelectorAll(".modal")).some(modal => 
+                getComputedStyle(modal).display !== "none"
+            );
+            document.body.style.overflowY = anyModalVisible ? "hidden" : "auto";
+        }
+
+        // Given the data-page input from the clicked button, fetch that page and render it in base.html
+        function fetchContent(page, pageScript) {
+            fetch(`/${page}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById("base-content-div").innerHTML = html;
+            })
+
+            // Load the script JS associated with each content page
+            const script = document.createElement("script")
+            script.src = "/static/js/" + pageScript
+            document.body.appendChild(script);
+
+
+        }
+    </script>
+
+</html>

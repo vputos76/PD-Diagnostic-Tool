@@ -1,0 +1,194 @@
+<!-- Header panel that is included in base.html -->
+<!-- Has buttons to view/edit patient info, begin testing, view results, view progression, view testing guidelines -->
+<!-- Contains buttons to create new patient, load a patient, and close that patient (these all open various modals) -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Template</title>
+    <link id="header-styles" rel="stylesheet" href="../static/css/header.css">
+    <link rel="stylesheet" href="../static/css/patient_modal.css">
+    <link rel="stylesheet" href="../static/css/patient_info.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+
+<body>
+    <header id="header">
+        <!-- Create flex container for header panel -->
+        <div id="patient-info-panel">
+            <!-- Load in test patient profile photo on right side of screen -->
+            <div id="profile-photo-div">
+                <img id="profile-photo" src="" alt="Patient Profile Photo">
+            </div>
+            <!-- Patient Information to be loaded when file is opened. Taken from main.py input -->
+            <div class="patient-information">
+                <h2 id="header-name" style="font-size: 4vh;"></h2>
+                <p id="header-id">Patient ID: </p>
+                <p id="header-dob">Date of Birth: </p>
+                <p id="header-age">Age: </p>
+                <p id="header-sex">Sex: </p>
+                <p id="header-doc">Attending Physician: </p>
+            </div>
+            <!-- Load in company logo on left side of screen with user name below it-->
+            <div>
+                <div id="company-logo">
+                    <img src="../static/images/test_logo.png" alt="Company Logo">
+                </div>
+                <h3 id="user-login">User Login: {{ user }}</h3>
+            </div>
+        </div>
+
+        <!-- Create button series that control which page is open in the software -->
+        <div id="control-buttons-panel">
+            <!-- Commented out Patient Info since it is not relevant to be able to edit it (not for the scope of the project, anyways) -->
+            <!-- <button class="control-buttons" id="patient-info-button"><span class="material-symbols-outlined">account_circle</span>Patient Info</button> -->
+            <button class="control-buttons" disabled id="testing-button" data-page="content_pages/testing.html" page-script="testing_functions.js"><span class="material-symbols-outlined">mic</span>Testing</button>
+            <button class="control-buttons" disabled id="review-data-button" data-page="content_pages/review.html" page-script="null.js"><span class="material-symbols-outlined">analytics</span>Review Data</button>
+            <button class="control-buttons" disabled id="progression-button" data-page="content_pages/progression.html" page-script="null.js"><span class="material-symbols-outlined">trending_up</span>Progression</button>
+            <button class="control-buttons" disabled id="test-guidelines-button" data-page="content_pages/test_guide.html" page-script="null.js"><span class="material-symbols-outlined">description</span>Test Guidelines</button>
+            <div id="heading-spacer"></div>
+
+            <!-- Make close patient button, which uses an input (hidden) to "log out" of the current patient's folder -->
+            <button id="new-patient-button" class="new-patient"><span class="material-symbols-outlined">add</span>New Patient</button>
+            <!-- Make open patient button, which uses an input (hidden) to open file explorer -->
+            <button id="open-patient-button" class="open-patient"><span class="material-symbols-outlined">folder_open</span>Open Patient</button>
+            <!-- Make close patient button, which uses an input (hidden) to "log out" of the current patient's folder -->
+            <button id="close-patient-button" class="close-patient"><span class="material-symbols-outlined">cancel</span>Close Patient</button>
+
+        </div>
+
+        <div id="new-patient-modal" class="modal">
+            <div id="new-patient-content" class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2>Please enter new patient details</h2>
+                    </div>
+                    <span id="close-new-patient" class="close">&times;</span>  <!-- Place in "X" to close window-->
+                </div>
+                <form method="POST" action="/create_new_patient">
+                    <div class=info-form>
+                        <h4 class="patient-input-header">First Name</h4>    
+                        <input class="new-patient-input" name="fname" id="fname" type="text" placeholder="First Name" required autocomplete="off">
+                
+                        <h4 class="patient-input-header">Last Name</h4>    
+                        <input class="new-patient-input" name="lname" id="lname" type="text" placeholder="Last Name" required autocomplete="off">
+                        
+                        <h4 class="patient-input-header">Date of Birth</h4>    
+                        <input class="new-patient-input" name="dob" id="dob" type="date" required autocomplete="off">
+                    
+                        <h4 class="patient-input-header">Sex</h4>    
+                        <input class="new-patient-input" name="sex" id="sex" type="text" placeholder="Sex" required autocomplete="off">
+                        
+                        <h4 class="patient-input-header">Attending Physician</h4>    
+                        <input class="new-patient-input" name="attending" id="attending" type="text" placeholder="Attending Physician" required autocomplete="off">
+                    </div>
+                    
+                    <div id="photo-upload-div">
+                        <label>Upload Patient Photo</label>
+                        <input id="photo-upload" name="photo-upload" type="file">
+                    </div>
+            
+                    <div id="info-submit">
+                        <input id="update-patient-info" type="submit" value="Update" disabled>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal for opening up patient file -->
+        <div id="open-patient-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2>Please select a patient</h2>
+                        <h4>This will close the active patient</h4>
+                    </div>
+                    <!-- Place search bar with logo on left side -->
+                    <div class="search-bar-and-logo">
+                        <span class="material-symbols-outlined" id="search-bar-logo">search</span>
+                        <input type="text" placeholder="Entire patient ID or name..." id="patient-search-bar" autocomplete="off">
+                    </div>
+                    <span id="close-patient-modal" class="close">&times;</span>  <!-- Place in "X" to close window-->
+                </div>
+                <!-- Table to hold first name, last name, and patient ID, which is continually filtered when text is enterd into the sarch bar -->
+                <div id="search-table-div">
+                    <table id="patient-search-table">
+                        <thead>
+                            <th>Patient ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                        </thead>
+                        <tbody><!-- Content from master patient database will go here--></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for confirming if the patient file should be closed -->
+        <div id="confirm-close-modal" class="modal">
+            <div id="confirm-close-content" class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h2>Are you sure you want to close the active patient?</h2>
+                    </div>
+                    <span id="close-confirm-modal" class="close">&times;</span>  <!-- Place in "X" to close window-->
+                </div>
+                <div id="confirm-close-panel">
+                    <button id="confirm-close-panel-yes" class="confirm-close-button">Yes</button>
+                    <button id="confirm-close-panel-no" class="confirm-close-button">No</button>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+
+    <script>
+        // Assign variable name to the modal itself
+        let patientInfoModal = document.getElementById("new-patient-modal");
+        // Assign variable name to the button that opens the modal
+        let newPatientButton = document.getElementById("new-patient-button");
+        // Assign the span element that closes the modal
+        let closeNewPatient = document.getElementById("close-new-patient");
+        // When the user clicks the button, the modal display changes from "none" to "block"
+        newPatientButton.onclick = function() {patientInfoModal.style.display = "block";}        
+        // When the user clicks the "X" button, the modal display changes from "block" to "none", closing it
+        closeNewPatient.onclick = function() {patientInfoModal.style.display = "none";}
+
+
+        // Assign variable name to the modal itself
+        let openPatientModal = document.getElementById("open-patient-modal");
+        // Assign variable name to the button that opens the modal
+        let openModalButton = document.getElementById("open-patient-button");
+        // Assign the span element that closes the modal
+        let closePatientModal = document.getElementById("close-patient-modal");
+        // When the user clicks the button, the modal display changes from "none" to "block"
+        openModalButton.onclick = function() {openPatientModal.style.display = "block";}        
+        // When the user clicks the "X" button, the modal display changes from "block" to "none", closing it
+        closePatientModal.onclick = function() {openPatientModal.style.display = "none";}
+
+
+        // Assign variable name to the modal itself
+        let confirmCloseModal = document.getElementById("confirm-close-modal");
+        // Assign variable name to the button that opens the modal
+        let confirmCloseButton = document.getElementById("close-patient-button");
+        // Assign the span element that closes the modal
+        let closeConfirmModal = document.getElementById("close-confirm-modal");
+        let closeConfirmModalNo = document.getElementById("confirm-close-panel-no");
+        // When the user clicks the button, the modal display changes from "none" to "block"
+        confirmCloseButton.onclick = function() {confirmCloseModal.style.display = "block";}        
+        // When the user clicks the "X" button, the modal display changes from "block" to "none", closing it
+        closeConfirmModal.onclick = function() {confirmCloseModal.style.display = "none";}
+        closeConfirmModalNo.ondblclick = function() {confirmCloseModal.style.display = "none";}
+  
+    </script>
+    <!-- Set script for external JS functions -->
+    <script src="{{ url_for('static', filename='js/patient_search_table.js') }}"></script>
+    <script src="../static/js/new_patient_input.js"></script>
+    <script src="../static/js/header_scroll.js"></script>
+
+
+</body>
+</html>

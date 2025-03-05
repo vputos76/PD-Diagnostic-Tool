@@ -1,0 +1,12 @@
+/* Import colours from constants.css */
+@import url(constants.css);
+
+#footer{
+    background-color: var(--bg);
+    border-top: 4px solid var(--button);
+    color: var(--button-accent);
+    padding: 20px;
+    text-align: center;
+    margin: 0;
+    bottom: 10;
+}

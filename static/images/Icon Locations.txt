@@ -1,0 +1,21 @@
+Taken from Google Fonts (Google Icons)
+
+***Header Panel***
+--Patient Info Button: Account Circle( #f5f7f8)
+--Testing Button: Mic ( #f5f7f8)
+--Review Data Button: Analytics( #f5f7f8)
+--Progression Button: Trending Up ( #f5f7f8)
+--Test Guidelines Button: Description ( #f5f7f8)
+--Open Patient Button: Folder Open ( #f5f7f8)
+--Close Patient Button: Cancel ( #f5f7f8)
+--New Patient Button: Add ( #f5f7f8)
+
+
+***Patient Search Modal***
+--Open Patient Folder Search Bar: Search (#0d525a)
+
+
+***Login Screen***
+--Login screen lock icon: Taken from canva (#0d525a)
+--Password visible: visibility_off
+--Password visible: visibility
