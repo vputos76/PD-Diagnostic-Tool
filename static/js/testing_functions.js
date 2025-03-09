@@ -22,11 +22,18 @@ let yesRestart = document.getElementById("confirm-restart-panel-yes");
 let noRestart = document.getElementById("confirm-restart-panel-no");
 let closeRestart = document.getElementById("close-restart-modal");
 
-surveyButton.addEventListener("click", () => buttonClicked("survey", surveyButton))
-handmotionButton.addEventListener("click", () => buttonClicked("handmotion", handmotionButton))
-speechButton.addEventListener("click", () => buttonClicked("speech", speechButton))
-tremorButton.addEventListener("click", () => buttonClicked("tremor", tremorButton))
+// Assign variables for speech test instructional modal
+const speechTestModal = document.getElementById("speech-test")
+const speechStartSymbol = document.getElementById("start-test-symbol")
 
+
+
+surveyButton.addEventListener("click", () => buttonClicked("survey", surveyButton))                 // Open up survey
+handmotionButton.addEventListener("click", () => buttonClicked("handmotion", handmotionButton))     // Open up handmotion test
+speechButton.addEventListener("click", () => buttonClicked("speech", speechButton))                 // Open up speech test
+tremorButton.addEventListener("click", () => buttonClicked("tremor", tremorButton))                 // Open up tremor test
+
+// speechButton.addEventListener("click", () => speechModal())                                         // Show modal for speech test instructions
 
 // Connect to main.py file and begin test based on what button was clicked
 function buttonClicked(button, buttonName) {
@@ -97,8 +104,17 @@ function beginTest(button, bodyVar, statusVar) {
             },
             body: formData.toString()
         })
-        isTestRunning[button] = false;
+        // Run speech test
+        if (bodyVar === "test_type=speech"){
+            speechModal()
+        }
 
+        // Run survey test
+        if (bodyVar === "type_test=survey"){
+            surveyModal()
+        }
+
+        isTestRunning[button] = false;
     }
 
     // Change incomplete staus mark to complete
@@ -127,3 +143,52 @@ function noHandler() {
     yesRestart = newYesRestart;
 }
 
+// Show the modal that has instructions for the speech test
+function speechModal() {
+    speechTestModal.style.display = "flex"
+    // Cause a 6 second delay before the background noise test begins--allows program to load recording function and take ambient noise reading
+    setTimeout(function(){
+        speechStartSymbol.innerHTML = "Speak"
+        speechStartSymbol.style.color = "#27969e"
+    },6000)
+    // Let the user know that the recording has finished
+    setTimeout(function(){
+        speechStartSymbol.innerHTML = "Recording Finished"
+        speechStartSymbol.style.color = "#780000"
+    },10000)
+    // 2 seconds after the recording is finished close the window
+    setTimeout(function(){
+        speechTestModal.style.display = "none"
+    },12000)
+    // Change instruction back to "Don't Speak" in case the test is run again
+    speechStartSymbol.innerHTML = "Don't Speak"
+
+}
+
+// Add survey questions (radiobuttons) to the modal
+function surveyModal(){
+    // Define where the ssurvey questions will be placed
+    const targetDiv = document.getElementById("survey-test-content")
+    // Define answer types (agree, don't agree, etc.)
+    const answers = ["0-Never", "1-Rarely", "2-Occasionally", "3-Sometimes", "4-Frequently", "5-Always"];
+    // Define questions to be asked
+    const questions = ["TREMOR - Involuntary movement at rest.",
+        "RIGIDITY - Tightness or stiffness of the limbs or torso.",
+        "BALANCE / WALKING DIFFICULTIES - Taking small or slow steps; a shuffling gait; decrease in the natural swing of the arms.",
+        "MOTOR FLUCTUATIONS / DYSKINESIA - Motor Fluctuations are 'on' and 'off' periods of controlled motor symptoms; Dyskinesia is sudden, uncontrollable movements.",
+        "DIZZINESS UPON STANDING - The sensation of light-headednesss, which often leads to a loss of balance, when moving from sitting to standing or lying down to standing.",
+        "FALLS - Balance impairment can lead to falls.",
+        "FATIGUE / SLEEP DISTURBANCES - Difficulty falling asleep or staying asleep; vivid dreams; daytime sleepiness.",
+        "ANXIETY / DEPRESSION / MEMORY - Feeling nervous or irritable; feeling sad, empty and hopeless; loss of pleasure in things you once enjoyed; problems with thinking, word finding, and judgment.",
+        "SWALLOWING - Difficulty swallowing; drooling; excessive saliva in the mouth.",
+        "GASTROINTESTINAL ISSUES / CONSTIPATION - Nausea; vomiting; diarrhea; infrequent bowel movements.",
+        "SEXUAL CONCERNS - Changes in sexual desire or erectile dysfunction.",
+        "HALLUCINATIONS - Seeing, hearing or sensing things that are not there.",
+        "DELUSIONS - Believing things that are not true, e.g. Everyone is ststaring at me when I walk outside.",
+        "URINARY FREQUENCY - The need to urinate often.",
+        "URINARY URGENCY - The feeling that one must urinate right away, even if the bladder is not full.",
+        "URINARY INCONTINENCE .",];
+
+
+
+}

@@ -102,6 +102,12 @@ def get_patient(patient_id):
     session["sex"] = patient_header_info["Sex"]
     session["age"] = age
     session["photo"] = patient_photo_file
+    session["handmotion_completed"] = "Incomplete"     # Reset which tests are completed
+    session["speech_completed"] = "Incomplete"
+    session["tremor_completed"] = "Incomplete"
+    session["survey_completed"] = "Incomplete"
+
+
     
     # Delete session data when switching patient so it does not cause file storage/finding issues
     if "session_num" in session:
@@ -114,7 +120,7 @@ def get_patient(patient_id):
 def homescreen():
     # Get username from Flask session, default to "Guest"
     session["user"] = "Vincent Putos"
-    return render_template("base.html", user=session["user"])
+    return render_template("base.html", user=session["user"], session=session)
 
 # Return JSON object of single patient from master patient list
 @app.route("/create_new_patient", methods=["POST"])
@@ -191,18 +197,34 @@ def run_test():
 
         # Once the window is closed (data is no longer being recorded), save the data in the session file and return to the test selection screen
         move(os.path.join(os.getcwd(), "pressure_tilt.csv"), os.path.join(os.getcwd(), session["session_workspace"], "pressure_tilt.csv"))
+        session["handmotion_completed"] = "Complete"
         return jsonify({"Status" : "Trial completed successfully"})
 
 
     # If the Speech trial button is clicked
-    if test_type == ("speech"):
-        utils.sound_recording.record_audio()
-        return jsonify({"Message" : "You have clicked on the Speech Test Button! It's not ready yet :("})
+    elif test_type == ("speech"):
+        # Start the recording, and record the status value as complete
+        utils.sound_recording.record_audio(keyword="Microphone (Yeti Stereo Microph")
+        session["speech_completed"] = "Complete"
+        # Move the data
+        move(os.path.join(os.getcwd(), "speech_test.wav"), os.path.join(os.getcwd(), session["session_workspace"], "speech_test.wav"))
+
+        return jsonify({"Message" : "Trial completed successfully"})
     
 
     # If the Tremor trial button is clicked
-    if test_type == ("tremor"):
+    elif test_type == ("tremor"):
+        session["tremor_completed"] = "Complete"
+
+
         return jsonify({"Message" : "You have clicked on the Tremor Test Button! It's not ready yet :("})
+
+    # If the Survey button is clicked
+    elif test_type == ("survey"):
+        # Record survey
+        session["survey_completed"] = "Complete"
+
+        return jsonify({"Message" : "You have clicked on the Survey Button! It's not ready yet :("})
 
 ######################################################################################################
 ###---------------------------------------Program Functions----------------------------------------###

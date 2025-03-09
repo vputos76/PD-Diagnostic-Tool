@@ -121,6 +121,7 @@
     ;
 }
 
+/* For incomplete test status */
 .test-status{
     font-size: larger;
     color: var(--close-patient);
@@ -172,4 +173,14 @@ li{
 }
 #confirm-restart-panel button:active {
     background-color: var(--button-active);
+}
+
+/* ------------------------------------------------------------ */
+/* --------------------- Speech Test Modal -------------------- */
+/* ------------------------------------------------------------ */
+
+#start-test-symbol{
+    font-size: 10vh;
+    text-align: center;
+    color: var(--close-patient);
 }

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testing</title>
+    <link rel="stylesheet" href="../../static/css/testing.css">
 
+    <title>Testing</title>
 
 </head>
 <body>
@@ -21,7 +22,7 @@
       
       <tr> <!-- Starting Survey -->
         <td class="test-table-test-name">APDA Healthcare Survey</td>
-        <td class="test-status" id="survey-status">Incomplete</td>
+        <td class="test-status" id="survey-status">{{ session["survey_completed"] }}</td>
         <td>
           <button id="start-survey-button" clicked="false">Start Test</button>
         </td>
@@ -39,7 +40,7 @@
       
       <tr> <!-- Hand Motion Test -->
         <td class="test-table-test-name">Hand Motion</td>
-        <td class="test-status" id="handmotion-status">Incomplete</td>
+        <td class="test-status" id="handmotion-status">{{ session["handmotion_completed"] }}</td>
         <td>
           <button id="start-handmotion-button" clicked="false">Start Test</button>
         </td>
@@ -58,7 +59,7 @@
 
       <tr> <!-- Speech Test -->
         <td class="test-table-test-name">Speech</td>
-        <td class="test-status" id="speech-status">Incomplete</td>
+        <td class="test-status" id="speech-status">{{ session["speech_completed"] }}</td>
         <td>
           <button id="start-speech-button" clicked="false">Start Test</button>
         </td>
@@ -81,7 +82,7 @@
 
       <tr> <!-- Tremor Test -->
         <td class="test-table-test-name">Tremor</td>
-        <td class="test-status" id="tremor-status">Incomplete</td>
+        <td class="test-status" id="tremor-status">{{ session["tremor_completed"] }}</td>
         <td>
           <button id="start-tremor-button" clicked="false">Start Test</button>
         </td>
@@ -99,6 +100,7 @@
     </tbody>
         
   </table>
+
   <div id="analyze-button-div">
     <button id="run-algorithm-button">Analyze Test Results</button>
   </div>
@@ -118,9 +120,42 @@
             <button id="confirm-restart-panel-no" class="confirm-restart-button">No</button>
         </div>
     </div>
-</div>
+  </div>
 
+  <div id="speech-test" class="modal">
+    <div id="speech-test-content" class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2>Please wait silently for the test to start.</h2>
+                <h4>Hold only the long "aw" vowel sound until the test is completed.</h4>
+                <h3>Examples:
+                  <ul>
+                    <li>P<em>aw</em></li>
+                    <li>L<em>aw</em></li>
+                    <li>M<em>aw</em></li>
+                  </ul>
+                </h3>
+                <p id="start-test-symbol">Don't Speak</p>
+
+            </div>
+        </div>
+    </div>
+  </div>
+
+
+  <div id="survey-test" class="modal">
+    <div id="survey-test-content" class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2>Please answer the following questions honestly based on how much you experience the following symptoms.</h2>
+
+
+            </div>
+        </div>
+    </div>
+  </div>
 
 </body>
+
   
 </html>
