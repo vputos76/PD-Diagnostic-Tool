@@ -83,13 +83,11 @@
             .then(response => response.text())
             .then(html => {
                 document.getElementById("base-content-div").innerHTML = html;
+                // Load the script associated with each content page
+                const script = document.createElement("script")
+                script.src = "/static/js/" + pageScript
+                document.body.appendChild(script);
             })
-
-            // Load the script JS associated with each content page
-            const script = document.createElement("script")
-            script.src = "/static/js/" + pageScript
-            document.body.appendChild(script);
-
 
         }
     </script>

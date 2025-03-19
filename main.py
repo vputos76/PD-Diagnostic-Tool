@@ -1,14 +1,14 @@
 # To render website and load HTML templates
-from flask import Flask, render_template, jsonify, redirect, request, url_for, session, send_from_directory
+from csv import writer                          # Write survey data to .csv format
 from datetime import datetime                   # Work out patient age from birthday
+from flask import Flask, render_template, jsonify, redirect, request, url_for, session, send_from_directory
 from json import load, dumps                    # To read JSON-stored patient data
 from psutil import process_iter                 # Used to get hold of running application windows
 from random import randint                      # Used to generate random patient ID
 from shutil import copy, move                   # Used to copy profile photos from images to patient directory
 from time import sleep                          # Sleep when switching between incorrect/correct login page
 import os                                       # Determine which user is using the program
-import utils
-import utils.sound_recording                                    # Import utilities Python script folder
+import utils.sound_recording                    # Import utilities Python script folder
 
 app = Flask(__name__)
 app.secret_key = "capstone_25"
@@ -106,9 +106,8 @@ def get_patient(patient_id):
     session["speech_completed"] = "Incomplete"
     session["tremor_completed"] = "Incomplete"
     session["survey_completed"] = "Incomplete"
+    session["all_complete"] = False
 
-
-    
     # Delete session data when switching patient so it does not cause file storage/finding issues
     if "session_num" in session:
         del session["session_num"]
@@ -119,7 +118,6 @@ def get_patient(patient_id):
 @app.route('/home')
 def homescreen():
     # Get username from Flask session, default to "Guest"
-    session["user"] = "Vincent Putos"
     return render_template("base.html", user=session["user"], session=session)
 
 # Return JSON object of single patient from master patient list
@@ -188,17 +186,51 @@ def run_test():
     # Get test type
     test_type = request.form.get("test_type")
 
+    # If the Survey button is clicked
+    if test_type == ("survey"):
+        # Record survey
+        data = request.form.to_dict()  # Convert FormData to a dictionary
+        # Define how survey answers correspond to numerical values
+        survey_map = {"Never" : 0, "Rarely" : 1, "Occasionally" : 2, "Sometimes" : 3, "Frequently" : 4, "Always" : 5}
+
+        # Create a dictionary that mimics the survey results, but with numerical results
+        mapped_data = {key: survey_map.get(value) for key, value in data.items()}
+
+        # Set categories and associated question topics to be used in radar graph in {category: [(question, score), ...], ...} format
+        radar_categories = {
+            "Sexual Concerns" : [("Sexual Concerns", mapped_data["question1"])],
+            "Tremor" : [("Tremor", mapped_data["question2"])],
+            "Rigidity" : [("Rigidity", mapped_data["question3"])],
+            "Balance/Walking Difficulties" : [("Balance/Walking Difficulties", mapped_data["question4"]), ("Dizziness Upon Standing", mapped_data["question5"]), ("Falls", mapped_data["question6"])],
+            "Motor Fluctuations/Dyskinesia" : [("Motor Fluctuations/Dyskinesia", mapped_data["question7"])],
+            "Fatigue/Sleep Disturbances" : [("Fatigue/Sleep Disturbances", mapped_data["question8"])],
+            "Anxiety/Depression/Memory" : [("Anxiety/Depression/Memory", mapped_data["question9"]), ("Hallucinations", mapped_data["question10"]), ("Delusions", mapped_data["question11"])],
+            "Swallowing" : [("Swallowing", mapped_data["question12"])],
+            "Gastrointestinal Issues/Constipation" : [("Gastrointestinal Issues/Constipation", mapped_data["question13"]), ("Urinary Frequency", mapped_data["question14"]), ("Urinary Urgency", mapped_data["question15"]), ("Urinary Incontinence", mapped_data["question16"])]
+        }
+        # Take an average of the questions in each category and place in a dictionary to be used for the radar chart
+        averaged = {key:round(sum(qs[1] for qs in value)/len(value)) for key, value in radar_categories.items()}
+
+        # Write mapped data to a csv file and store it in the session folder
+        with open(os.path.join(session["session_workspace"], f"{session['session_num']}_survey.csv"), "a", newline="") as file:
+            csv_writer = writer(file)  # Use csv.writer instead of DictWriter
+            if file.tell() == 0:  # Write header only if file is empty
+                csv_writer.writerow(["Question", "Response"])  # Header row
+            # Write each key-value pair as a new row
+            csv_writer.writerows(averaged.items())  # Writes each (key, value) pair as a row
+
+        session["survey_completed"] = "Complete"
+
+
     # If the Hand Motion trial button is clicked
-    if test_type == ("handmotion"):
+    elif test_type == ("handmotion"):
         os.startfile(r"..\WakumTest\Wakum\Wintab Pressure Test\SampleCode\Debug\PressureTest")
         # While the test is running, the program should do nothing (i.e. just let data be recorded)
         while is_test_running("PressureTest.exe"):
             pass
-
         # Once the window is closed (data is no longer being recorded), save the data in the session file and return to the test selection screen
-        move(os.path.join(os.getcwd(), "pressure_tilt.csv"), os.path.join(os.getcwd(), session["session_workspace"], "pressure_tilt.csv"))
+        move(os.path.join(os.getcwd(), "pressure.csv"), os.path.join(os.getcwd(), session["session_workspace"], "pressure.csv"))
         session["handmotion_completed"] = "Complete"
-        return jsonify({"Status" : "Trial completed successfully"})
 
 
     # If the Speech trial button is clicked
@@ -208,23 +240,39 @@ def run_test():
         session["speech_completed"] = "Complete"
         # Move the data
         move(os.path.join(os.getcwd(), "speech_test.wav"), os.path.join(os.getcwd(), session["session_workspace"], "speech_test.wav"))
-
-        return jsonify({"Message" : "Trial completed successfully"})
     
 
     # If the Tremor trial button is clicked
     elif test_type == ("tremor"):
+        # Start witmotion software
+        os.startfile(r"C:\WitMotion(V2024.12.27.0)/WitMotion")
+        while is_test_running("WitMotion.exe"):
+            pass
+        # Define current WitMotion file storage directory
+        dataDir = r"C:\WitMotion(V2024.12.27.0)\Record"
+        # Determine current date to find folder in Record folder
+        recordFolder = str(datetime.now().date())
+        # Get the most recent data file from the data folder for today's date (i.e. the test that just finished)
+        mostRecent = os.listdir(os.path.join(dataDir, recordFolder))[-1]
+
+        # Create path to data file ("data_0.csv" is WitMotion's standard naming convention for data files)
+        dataPath = os.path.join(dataDir, recordFolder, mostRecent, "data_0.csv")
+        # Create path where data should be moved to
+        targetPath = os.path.join(os.getcwd(), session["session_workspace"], f"{session['id']}_tremor.csv")
+
+        move(dataPath, targetPath)
         session["tremor_completed"] = "Complete"
 
+    # Check to see if all of the tests have been compelted
+    if all([session["tremor_completed"] == "Complete", session["survey_completed"] == "Complete", session["handmotion_completed"] == "Complete", session["speech_completed"] == "Complete"]):
+        session["all_complete"] = True
 
-        return jsonify({"Message" : "You have clicked on the Tremor Test Button! It's not ready yet :("})
+    return jsonify({"Status" : "Trial completed successfully"})
 
-    # If the Survey button is clicked
-    elif test_type == ("survey"):
-        # Record survey
-        session["survey_completed"] = "Complete"
-
-        return jsonify({"Message" : "You have clicked on the Survey Button! It's not ready yet :("})
+# Check session variables for debugging
+@app.route('/session-data')
+def session_data():
+    return jsonify(session)  # Displays session as a JSON dict in the browser
 
 ######################################################################################################
 ###---------------------------------------Program Functions----------------------------------------###
@@ -240,6 +288,9 @@ def check_session_number():
     os.makedirs(f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{session['session_num']}", exist_ok=True)
     # Save the session workspace for data to be stored to
     session["session_workspace"] = f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{session['session_num']}"
+    # Create a JSON file that shows when this session was created
+    with open(f"{session['session_workspace']}/info.JSON", "w") as file:
+        file.write(dumps({"date" : str(datetime.now().date())}, indent=4))
 
 # Detect if applications (.exe files) are running
 def is_test_running(process_name):
@@ -247,9 +298,6 @@ def is_test_running(process_name):
         if process.info['name'] and process_name.lower() in process.info['name'].lower():
             return True
     return False
-
-
-
 
 ######################################################################################################
 ###----------------------------------------------Main----------------------------------------------###

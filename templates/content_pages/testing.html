@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../static/css/testing.css">
-
     <title>Testing</title>
 
 </head>
@@ -33,7 +31,14 @@
           <!-- Drop-down text to show testing guidelines -->
           <details class="test-details" id="survey-details">
             <summary><b>Click for APDA Healthcare Survey Guidelines</b></summary>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+            <ol>
+              <li>Click the "Start Test" button. A window should appear over the existing screen.</li>
+              <li>If the patient is capable, ask them to read through each of the survey questions and click on the most appropriate response.</li>
+              <ul><li>If the patient is unable to independently complete this task, read the questions aloud to the patient and ask them to answer with the most appropriate response.</li></ul>
+              <li>Once all survey questions are complete, click the "Finish Survey" button.</li>
+              <ul><li>The data will be automatically saved and moved to the patient's file.</li></ul>
+             
+            </ol>
           </details>
         </td>
       </tr>
@@ -51,7 +56,13 @@
           <!-- Drop-down text to show testing guidelines -->
           <details class="test-details" id="handmotion-details">
             <summary><b>Click for Hand Motion Test gidelines</b></summary>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+            <ol>
+              <li>Ensure the patient is sitting near a firm surface and is positioned appropriately to write.</li>
+              <li>The system's drawing tablet and stylus should be available, with a spiral drawing page taped to the tablet surface.</li>
+              <li>Click the "Start Test" button. A new window should load over the existing screen.</li>
+              <li>Instruct the patient to begin tracing the spiral from the inside in one motion (i.e. without lifting the pen).</li>
+              <li>Once the test is complete, close the window. The data will be automatically saved and moved to the patient's file.</li>
+            </ol>
           </details>
         </td>
       </tr>
@@ -72,8 +83,13 @@
             <summary><b>Click for Speech Test gidelines</b></summary>
             <ol>
               <li>Ensure the test is being conducted in a quiet environment, and click the "Start Test" button.</li>
-              <li>The patient will be instructed to wait in silence for approximately 5 seconds. Ensure little to no sounds occur during this time, as the system is calibrating to background noise levels.</li>
-              <li>The patient will be instructed to hold a vowel for a set period of time.</li>
+              <ul><li>The patient should be sitting close to the microphone, with the device in an upright position.</li></ul>
+              <li>The patient will be instructed to wait in silence for approximately 4 seconds.</li>
+              <ul><li>Ensure little to no sounds occur during this time, as the system is calibrating to background noise levels.</li></ul>
+              <li>The patient will be instructed to hold a vowel for a set period of time (approximately 15 seconds).</li>
+              <ul><li>Examples will be provided on the window that apppears.</li></ul>
+              <li>Once recording is finished, remain silent until the pop-up screen disappears and the main screen is visible again.</li>
+              <ul><li>The recorded file will be automatically saved and moved to the patient's file.</li></ul>
             </ol>
           </details>
         </td>
@@ -93,7 +109,24 @@
           <!-- Drop-down text to show testing guidelines -->
           <details class="test-details" id="tremor-details">
             <summary><b>Click for Tremor Test gideline</b></summary>
-            <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.</p>
+            <ol>
+              <li>Ensure the accelerometer's wristband is fastened securely around the patient's wrist, and the device is facing upright.</li>
+              <li>Activate the device by moving the side switch to the "On" position.</li>
+              <li>Confirm that the patient is sitting in a relaxed posture with their arm along a firm surface.</li>
+              <li>Click the "Start Test" button. A new window should open over the existing screen.</li>
+              <ul><li>If the left screen panel is not open, clicking on the arrow at the left edge of the window will reveal this tool.</li></ul>
+              <li>Under the "Modular Category" title, ensure "BWT901BLECL5.0" is selected from the drop-down menu.</li>
+              <ul><li>Click "Search Devices" if no models are available, and ensure the device "WT901BLE68(d3:c7:8d:a5:a9:b5)" is selected.</li></ul>
+              <li>Confirm that the device is receiving data by asking the patient to move their wrist and watching the software's changing gyroscopic readings.</li>
+              <li>Instruct the patient to remain still with their arm on the table until told otherwise.</li>
+              <ul><li>Ensure the patient has remained still for at least 5 seconds before beginning the test.</li></ul>
+              <li>In the bottom-right corner of the screen, click "Start Recording". This button should now turn green to signify that recording is in progress.</li>
+              <ul><li>A timer is available to the left of this button to view how long the test has been running for.</li></ul>
+              <li>After 20 seconds of recording click the "Stop Recording" button in the bottom-right corner.</li>
+              <ul><li>A pop up window will appear asking whether the data file location should be opened. Click "No".</li></ul>
+              <li>Close the window, which will bring the original program back into view.</li>
+              <ul><li>The data will be automatically saved and moved to the patient's file.</li></ul>
+            </ol>
           </details>
         </td>
       </tr>
@@ -102,7 +135,7 @@
   </table>
 
   <div id="analyze-button-div">
-    <button id="run-algorithm-button">Analyze Test Results</button>
+    <button id="run-algorithm-button" disabled>Analyze Test Results</button>
   </div>
       
   <!-- Modal to confirm that the user wants to delete old patient test file and create a new one -->
@@ -127,7 +160,7 @@
         <div class="modal-header">
             <div>
                 <h2>Please wait silently for the test to start.</h2>
-                <h4>Hold only the long "aw" vowel sound until the test is completed.</h4>
+                <h4>Hold only the long "\a\" vowel sound until the test is completed.</h4>
                 <h3>Examples:
                   <ul>
                     <li>P<em>aw</em></li>
@@ -135,8 +168,7 @@
                     <li>M<em>aw</em></li>
                   </ul>
                 </h3>
-                <p id="start-test-symbol">Don't Speak</p>
-
+                <p id="start-test-symbol">Do Not Speak&nbsp;&nbsp;&nbsp;4</p>
             </div>
         </div>
     </div>
@@ -145,13 +177,13 @@
 
   <div id="survey-test" class="modal">
     <div id="survey-test-content" class="modal-content">
-        <div class="modal-header">
-            <div>
-                <h2>Please answer the following questions honestly based on how much you experience the following symptoms.</h2>
-
-
-            </div>
+      <div id="form-container">
+        <div id="survey-modal-header" class="modal-header">
+          <h2>Please answer the following questions honestly based on how much you experience the following symptoms.</h2>
+          <span id="close-survey-modal" class="close">&times;</span>  <!-- Place in "X" to close window-->
         </div>
+        <form method="POST" id="survey-form" test_type="survey"></form>
+      </div>
     </div>
   </div>
 

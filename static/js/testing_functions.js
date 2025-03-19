@@ -27,13 +27,15 @@ const speechTestModal = document.getElementById("speech-test")
 const speechStartSymbol = document.getElementById("start-test-symbol")
 
 
-
 surveyButton.addEventListener("click", () => buttonClicked("survey", surveyButton))                 // Open up survey
 handmotionButton.addEventListener("click", () => buttonClicked("handmotion", handmotionButton))     // Open up handmotion test
 speechButton.addEventListener("click", () => buttonClicked("speech", speechButton))                 // Open up speech test
 tremorButton.addEventListener("click", () => buttonClicked("tremor", tremorButton))                 // Open up tremor test
 
-// speechButton.addEventListener("click", () => speechModal())                                         // Show modal for speech test instructions
+
+// Check to see if the button needs to be enabled every second using polling
+let polling = setInterval(checkEnableSubmitButton, 1000)
+
 
 // Connect to main.py file and begin test based on what button was clicked
 function buttonClicked(button, buttonName) {
@@ -62,7 +64,6 @@ function buttonClicked(button, buttonName) {
 
     // If the button has not been clicked before, rewrite the "clicked" attribute to reflect that it has been, then run the test
     if (buttonName.getAttribute("clicked") === "false") {
-        buttonName.setAttribute("clicked", "true");
         beginTest(button, bodyVar, statusVar)
     }
 
@@ -97,31 +98,92 @@ function beginTest(button, bodyVar, statusVar) {
         let formData = new URLSearchParams();
         formData.append("test_type", button);
     
-        fetch("/start_test", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded", 
-            },
-            body: formData.toString()
-        })
+        // Run survey test
+        if (bodyVar === "test_type=survey"){
+            openSurveyModal()
+            document.getElementById("survey-form").addEventListener("submit", function(event) {
+                event.preventDefault(); // Prevent default form submission
+            
+            // Send data to Python for conversion to CSV
+            let surveyData  = new FormData(this)   // Collect form data
+            surveyData.append("test_type", button);
+            fetch("/start_test", {
+                method: "POST",
+                body: surveyData,
+            })
+            .then(response => response.json())
+
+            // Close the modal after the form has been submitted
+            document.getElementById("survey-test").style.display = "none"
+            // If the submit survey button has been clicked, change the complete label to green
+            changeCompleteState(surveyButton, statusVar)
+            }, { once: true })
+        }
+        
+        // Run tremor test
+        if (bodyVar === "test_type=handmotion"){
+            fetch("/start_test", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded", 
+                },
+                body: formData.toString()
+            })
+            // After a few seconds (presumably the patient will have started writing by this point, change the "Complete" label colour to green)
+            setTimeout(function(){
+                changeCompleteState(handmotionButton, statusVar)
+            },5000)
+        }
+
         // Run speech test
         if (bodyVar === "test_type=speech"){
-            speechModal()
+            fetch("/start_test", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded", 
+                },
+                body: formData.toString()
+            })
+            openSpeechModal(statusVar)  // Pass statusVar in to change complete label in function after enough time has passed
         }
 
-        // Run survey test
-        if (bodyVar === "type_test=survey"){
-            surveyModal()
+        // Run tremor test
+        if (bodyVar === "test_type=tremor"){
+            fetch("/start_test", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded", 
+                },
+                body: formData.toString()
+            })
+            // After 15 seconds (presumably the patient will have started testing by this point, change the "Complete" label colour to green)
+            setTimeout(function(){
+                changeCompleteState(tremorButton, statusVar)
+            },15000)
         }
-
         isTestRunning[button] = false;
     }
+}
 
-    // Change incomplete staus mark to complete
+// Change incomplete staus mark to complete
+function changeCompleteState(buttonName, statusVar){
+    // Note that the button has been clicked (at this point the data will have been saved, but if the test is exited prematurely no data will be saved, so the confirm restart modal will open unnecessarily)
+    buttonName.setAttribute("clicked", "true");
+    // Change label
     statusLabel = document.getElementById(statusVar)
     statusLabel.innerHTML = "Complete"
     statusLabel.style.color = "green"
 }
+
+// Check to see if the submit button can be enabled or not
+async function checkEnableSubmitButton(){
+    let response = await fetch("/session-data");        // Wait for fetch to finish loading
+    let sessions = await response.json();
+    if (sessions.all_complete){
+        document.getElementById("run-algorithm-button").disabled = false
+    }
+}
+
 
 function yesHandler(button, bodyVar, statusVar) {
     restartTestModal.style.display = "none";
@@ -144,33 +206,64 @@ function noHandler() {
 }
 
 // Show the modal that has instructions for the speech test
-function speechModal() {
+function openSpeechModal(statusVar) {
     speechTestModal.style.display = "flex"
-    // Cause a 6 second delay before the background noise test begins--allows program to load recording function and take ambient noise reading
+    // Cause a 4 second delay before the background noise test begins--allows program to load recording function and take ambient noise reading
+    setTimeout(function(){speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;3"},1000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;2"},2000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;1"},3000)
+    // Tell the patient to speak
     setTimeout(function(){
-        speechStartSymbol.innerHTML = "Speak"
-        speechStartSymbol.style.color = "#27969e"
-    },6000)
+        speechStartSymbol.style.color = "#27969e";
+        speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;10";
+    },4000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;9"},5000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;8"},6000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;7"},7000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;6"},8000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;5"},9000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;4"},10000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;3"},11000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;2"},12000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;1"},13000)
+    // The user should not speak for the final 2 seconds of the test
+    setTimeout(function(){
+        speechStartSymbol.style.color = "#780000";
+        speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;2";
+    },14000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;1"},15000)
+    
     // Let the user know that the recording has finished
     setTimeout(function(){
+        speechStartSymbol.style.color = "#024308";
         speechStartSymbol.innerHTML = "Recording Finished"
-        speechStartSymbol.style.color = "#780000"
-    },10000)
+    },16000)
     // 2 seconds after the recording is finished close the window
     setTimeout(function(){
         speechTestModal.style.display = "none"
-    },12000)
+        changeCompleteState(speechButton, statusVar)
+    },18000)
     // Change instruction back to "Don't Speak" in case the test is run again
-    speechStartSymbol.innerHTML = "Don't Speak"
+    speechStartSymbol.style.color = "#780000";
+    speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;4"
+
 
 }
 
 // Add survey questions (radiobuttons) to the modal
-function surveyModal(){
-    // Define where the ssurvey questions will be placed
-    const targetDiv = document.getElementById("survey-test-content")
+function openSurveyModal(){
+    // Define the modal which becomes visible when the button is clicked
+    let surveyModal = document.getElementById("survey-test")
+    // Assign event listener to "X" button that closes modal
+    document.getElementById("close-survey-modal").addEventListener("click", function(){surveyModal.style.display = "none"})
+
+    // Define survey hmtl form and submit button
+    const form = document.getElementById("survey-form")
+    form.innerHTML = "" // Erase all content to prevent duplicating questions when reopening the modal
+
     // Define answer types (agree, don't agree, etc.)
-    const answers = ["0-Never", "1-Rarely", "2-Occasionally", "3-Sometimes", "4-Frequently", "5-Always"];
+    const answers = ["Never", "Rarely", "Occasionally", "Sometimes", "Frequently", "Always"];
+
     // Define questions to be asked
     const questions = ["TREMOR - Involuntary movement at rest.",
         "RIGIDITY - Tightness or stiffness of the limbs or torso.",
@@ -187,8 +280,66 @@ function surveyModal(){
         "DELUSIONS - Believing things that are not true, e.g. Everyone is ststaring at me when I walk outside.",
         "URINARY FREQUENCY - The need to urinate often.",
         "URINARY URGENCY - The feeling that one must urinate right away, even if the bladder is not full.",
-        "URINARY INCONTINENCE .",];
+        "URINARY INCONTINENCE - The loss of bladder control, resulting in leakage of urine.",];
+    
+    // Short number of questions for prototyping
+    // const questions = ["TREMOR - Involuntary movement at rest.", "RIGIDITY - Tightness or stiffness of the limbs or torso.",]
+    
+    // Make the modal visible
+    surveyModal.style.display = "flex"
+    
+    // For each of the questions (from "questions"), create a div that holds all answer options (from "answers")
+    questions.forEach((question, index) => {
+        // Create a div that will hold the questions
+        let questionContainer = document.createElement("div");
+        questionContainer.innerHTML = `<p>${index + 1}. ${question}</p>`;
+        
+        // For each of the questions, create 6 radiobuttons for each option in "answers"
+        answers.forEach(choice => {
+            // Set input radiobutton parameters
+            let radio = document.createElement("input")
+            radio.type = "radio";
+            radio.name = `question${index + 1}`; // i.e. "name=question1"
+            radio.value = choice;
+            radio.required = true;
 
+            // Create label to go alongside that radiobutton
+            let label = document.createElement("label");
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(" " + choice));
 
+            // Append each label to the div container that holds all options
+            questionContainer.appendChild(label);
+            questionContainer.appendChild(document.createElement("br"))
+        })
+        // Add newly formed divs to survey container
+        form.appendChild(questionContainer)
+        questionContainer.appendChild(document.createElement("br"))
+    })
+    // Add in button to submit the form after all questions have been placed
+    let submitSurvey = document.createElement("input")
+    submitSurvey.type = "submit"
+    submitSurvey.id = "submit-form-button"
+    submitSurvey.value = "Finish Survey"
+    submitSurvey.disabled = true
+    
+    let breakLine = document.createElement("br")
+    breakLine.id = "survey-break"
 
+    form.appendChild(breakLine)
+    form.appendChild(breakLine)
+    form.appendChild(submitSurvey)
+
+    // Event listener for each radiobutton to check if all buttons are clicked, which enables the submit survey button
+    document.querySelectorAll("#survey-form input[type='radio']").forEach((radio) => {
+        radio.addEventListener("change", function(){
+            // Define array of questions
+            const radioQuestions = document.querySelectorAll("#survey-form div");
+            let allSelected = Array.from(radioQuestions).every(fieldset => 
+                fieldset.querySelector("input[type='radio']:checked")
+            )       
+            submitSurvey.disabled = !allSelected    // Enable if all are answered
+        });
+    });
 }
+

@@ -100,7 +100,6 @@
 /* --------------------- Modal Scrollbar ---------------------- */
 /* ------------------------------------------------------------ */
 #search-table-div::-webkit-scrollbar{
-    background-color: var(--bg3);
     width: 2vh;
     border-radius: 10px;
     background-color: var(--button-accent);
@@ -196,6 +195,7 @@
     text-align: center;
     line-height: 2vh;
     padding: 8px; /* Add padding for better spacing */
+    border: 0;
 }
 
 /* Ensure table cells (`<td>`) also take full width */

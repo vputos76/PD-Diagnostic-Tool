@@ -4,7 +4,7 @@
 import sounddevice as sd                # Access device
 import scipy.io.wavfile as wav          # Write to .wav files
 # Record audio on the Blue Yeti microphone--initial 2.2s delay before recording is live
-def record_audio(keyword, duration=10, samplerate=44100):
+def record_audio(keyword, duration=17, samplerate=44100):
     print("Recording...")
     # Search for device within entire audio device query
     for i, device in enumerate(sd.query_devices()):

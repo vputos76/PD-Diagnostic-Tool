@@ -135,8 +135,6 @@ li{
 /* ------------------------------------------------------------ */
 /* ------------------- Confirm Restart Modal ------------------ */
 /* ------------------------------------------------------------ */
-
-
 #confirm-restart-content{
     width: 45%;
     height: 30%;
@@ -183,4 +181,61 @@ li{
     font-size: 10vh;
     text-align: center;
     color: var(--close-patient);
+}
+
+/* ------------------------------------------------------------ */
+/* ----------------------- Survey Modal ----------------------- */
+/* ------------------------------------------------------------ */
+/* Container for header and "X" close button */
+.survey-modal-header{
+    display: flex;
+    padding: 10px;
+}
+
+#close-survey-modal{
+    padding-right: 10px;
+}
+
+
+/* Container to hold HTML form */
+#form-container{
+    overflow: auto;
+    /* margin-left: 3vh;
+    margin-right: 2vh; */
+}
+
+#form-container::-webkit-scrollbar{
+    width: 2vh;
+    border-radius: 10px;
+    background-color: var(--button-accent);
+    justify-content: left;
+}
+
+#form-container::-webkit-scrollbar-thumb{
+    border-radius: 10px;
+    background-color: var(--button);
+}
+
+/* Submit survey button */
+#submit-form-button{
+    height: 8vh;
+    width: 25vh;
+    background-color: var(--new-patient);
+    border: 2px solid var(--new-patient-accent);
+    border-radius: 5vh;
+    color: var(--whitefont);
+    font-size: 3.1vh;
+}
+
+/* Control colour when submit survey button is hovered over */
+#submit-form-button:hover{
+    background-color: var(--new-patient-accent);
+    border: 2px solid var(--new-patient-active);
+    cursor: pointer;
+}
+/* Control colour when submit survey button is disabled */
+#submit-form-button:disabled, #run-algorithm-button:disabled{
+    background-color: var(--bg2);
+    cursor: default;
+    border: 2px solid var(--bg2);
 }
