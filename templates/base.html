@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../static/css/header.css">
     <link rel="stylesheet" href="../static/css/patient_modal.css">
     <link rel="stylesheet" href="../static/css/testing.css">
+    <link rel="stylesheet" href="../static/css/review.css">
     <link rel="icon" type="image/x-icon" href="../static/images/test_logo.ico">
 
     <style>
@@ -83,13 +84,25 @@
             .then(response => response.text())
             .then(html => {
                 document.getElementById("base-content-div").innerHTML = html;
+
+                // If the script is one of the following, append the .js script
+                const scriptsToReload = ["testing_functions.js", "process_data.js", "null.js"];
+                if (scriptsToReload.includes(pageScript))  {
+                // Remove existing script if it exists
+                const existingScript = document.querySelector(`script[src="/static/js/${pageScript}"]`);
+                if (existingScript) {
+                    existingScript.remove();
+                }     
+
                 // Load the script associated with each content page
                 const script = document.createElement("script")
                 script.src = "/static/js/" + pageScript
                 document.body.appendChild(script);
+            }
             })
-
         }
-    </script>
 
+    </script>
+    <!-- Script to incldue radar chart plotting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </html>

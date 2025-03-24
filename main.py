@@ -2,13 +2,15 @@
 from csv import writer                          # Write survey data to .csv format
 from datetime import datetime                   # Work out patient age from birthday
 from flask import Flask, render_template, jsonify, redirect, request, url_for, session, send_from_directory
-from json import load, dumps                    # To read JSON-stored patient data
+from json import load, dumps, dump              # To read JSON-stored patient data
+from pandas import read_csv                     # Used to read survey data to create radar charts in JS
 from psutil import process_iter                 # Used to get hold of running application windows
+from pygetwindow import getWindowsWithTitle     # Used to open and close PressureTest.exe window to ensure functionality
 from random import randint                      # Used to generate random patient ID
 from shutil import copy, move                   # Used to copy profile photos from images to patient directory
 from time import sleep                          # Sleep when switching between incorrect/correct login page
 import os                                       # Determine which user is using the program
-import utils.sound_recording                    # Import utilities Python script folder
+import utils
 
 app = Flask(__name__)
 app.secret_key = "capstone_25"
@@ -132,7 +134,10 @@ def create_patient():
     os.mkdir("./static/patient_data/" + id)
     # Create sessions folder within that patient's folder
     os.mkdir(f"./static/patient_data/{id}/{id}_sessions")
-
+    # Create an empty JSON file that shows when this session was created
+    with open(f"./static/patient_data/{id}/{id}_sessions/info.JSON", "w") as file:
+        dump({}, file, indent=4)
+        
     # Create dict to become JSON file
     new_patient = {
         "FirstName" : request.form.get("fname"),
@@ -175,6 +180,13 @@ def create_patient():
 # Render .html pages based when a button is clicked in the header panel
 @app.route("/<path:page>")
 def load_page(page):
+    # session["session_num"] = 1
+    # session["session_workspace"] = "./static/patient_data/0123456/0123456_sessions/session_1"
+    # session["all_complete"] = True
+    # session["handmotion_completed"] = "Complete"
+    # session["speech_completed"] = "Complete"
+    # session["survey_completed"] = "Complete"
+    # session["tremor_completed"] = "Complete"
     return render_template(page)
 
 # Based on the "run test" button clicked, trigger one of the hardware data collection methods to open
@@ -208,16 +220,44 @@ def run_test():
             "Swallowing" : [("Swallowing", mapped_data["question12"])],
             "Gastrointestinal Issues/Constipation" : [("Gastrointestinal Issues/Constipation", mapped_data["question13"]), ("Urinary Frequency", mapped_data["question14"]), ("Urinary Urgency", mapped_data["question15"]), ("Urinary Incontinence", mapped_data["question16"])]
         }
+
         # Take an average of the questions in each category and place in a dictionary to be used for the radar chart
         averaged = {key:round(sum(qs[1] for qs in value)/len(value)) for key, value in radar_categories.items()}
 
         # Write mapped data to a csv file and store it in the session folder
-        with open(os.path.join(session["session_workspace"], f"{session['session_num']}_survey.csv"), "a", newline="") as file:
+        with open(os.path.join(session["session_workspace"], f"{session['session_num']}_survey.csv"), "w", newline="") as file:
             csv_writer = writer(file)  # Use csv.writer instead of DictWriter
             if file.tell() == 0:  # Write header only if file is empty
                 csv_writer.writerow(["Question", "Response"])  # Header row
             # Write each key-value pair as a new row
             csv_writer.writerows(averaged.items())  # Writes each (key, value) pair as a row
+
+        # Show all question results to be displayed side by side with averaged categories
+        full_results = {
+            "Sexual Concerns" : mapped_data["question1"],
+            "Tremor" : mapped_data["question2"],
+            "Rigidity" : mapped_data["question3"],
+            "Balance/Walking Difficulties" : mapped_data["question4"],
+            "Dizziness Upon Standing" : mapped_data["question5"],
+            "Falls" : mapped_data["question6"],
+            "Motor Fluctuations/Dyskinesia" : mapped_data["question7"],
+            "Fatigue/Sleep Disturbances" : mapped_data["question8"],
+            "Anxiety/Depression/Memory" : mapped_data["question9"],
+            "Hallucinations" : mapped_data["question10"],
+            "Delusions" : mapped_data["question11"],
+            "Swallowing" : mapped_data["question12"],
+            "Gastrointestinal Issues/Constipation" : mapped_data["question13"],
+            "Urinary Frequency" : mapped_data["question14"],
+            "Urinary Urgency" : mapped_data["question15"],
+            "Urinary Incontinence" : mapped_data["question16"]
+        }
+        # Write complete data to a csv file and store it in the session folder
+        with open(os.path.join(session["session_workspace"], f"{session['session_num']}_full_survey.csv"), "w", newline="") as file:
+            csv_writer = writer(file)  # Use csv.writer instead of DictWriter
+            if file.tell() == 0:  # Write header only if file is empty
+                csv_writer.writerow(["Question", "Response"])  # Header row
+            # Write each key-value pair as a new row
+            csv_writer.writerows(full_results.items())  # Writes each (key, value) pair as a row
 
         session["survey_completed"] = "Complete"
 
@@ -225,11 +265,21 @@ def run_test():
     # If the Hand Motion trial button is clicked
     elif test_type == ("handmotion"):
         os.startfile(r"..\WakumTest\Wakum\Wintab Pressure Test\SampleCode\Debug\PressureTest")
+        # NOTE For some reason the program does not open properly and record pen pressure until the window is minimized and opened again. This automatically completes this prociedure
+        sleep(0.1)
+        for window in getWindowsWithTitle("PressureTest"):
+            if "PressureTest" in window.title:
+                app_window = window
+                break
+        if app_window:
+            app_window.minimize()  # Minimize the window
+            app_window.maximize()  # Minimize the window
+
         # While the test is running, the program should do nothing (i.e. just let data be recorded)
         while is_test_running("PressureTest.exe"):
             pass
         # Once the window is closed (data is no longer being recorded), save the data in the session file and return to the test selection screen
-        move(os.path.join(os.getcwd(), "pressure.csv"), os.path.join(os.getcwd(), session["session_workspace"], "pressure.csv"))
+        move(os.path.join(os.getcwd(), "pressure.csv"), os.path.join(session["session_workspace"], "pressure.csv"))
         session["handmotion_completed"] = "Complete"
 
 
@@ -269,28 +319,50 @@ def run_test():
 
     return jsonify({"Status" : "Trial completed successfully"})
 
-# Check session variables for debugging
-@app.route('/session-data')
-def session_data():
-    return jsonify(session)  # Displays session as a JSON dict in the browser
+# Return data files associated with each session
+@app.route('/session_variables')
+def session_vars():
+    return(jsonify(session))
+
+# Return data files associated with each session
+@app.route('/session_data/<sessionNum>')
+def session_data(sessionNum):
+    # Define full paths for each of the survey types
+    averaged_survey_path = f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{sessionNum}/{sessionNum}_survey.csv"
+    full_survey_path = f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{sessionNum}/{sessionNum}_full_survey.csv"
+    # Convert data to pandas dataframe to return to JS
+    averaged_data = read_csv(averaged_survey_path).to_dict(orient="records")
+    full_data = read_csv(full_survey_path).to_dict(orient="records")
+    return jsonify({
+        "radarData" : averaged_data,
+        "fullData" : full_data
+    })
+
+# Collect each of the session dates to fill in the Review page select combobox
+@app.route("/view_test_dates")
+def test_dates():
+    with open(f"./static/patient_data/{session['id']}/{session['id']}_sessions/info.JSON") as file:
+        return(jsonify(load(file)))
 
 ######################################################################################################
 ###---------------------------------------Program Functions----------------------------------------###
 ######################################################################################################
 # Check the number of previous sessions, create a new one if one has not been started, and assign that session number to a Flask session variable
 def check_session_number():
-    # Get number of previously made sessions by counting folders stored in {id#}_sessions
-    num_sessions = len(os.listdir(f"./static/patient_data/{session['id']}/{session['id']}_sessions"))
-    # This session is then the num_sessions incremented by one
-    this_session_num = num_sessions + 1
-    session["session_num"] = this_session_num
+    # Get number of previously made sessions by counting folders stored in {id#}_sessions + info.JSON (which makes it one more than total number of files)
+    session["session_num"] = len(os.listdir(f"./static/patient_data/{session['id']}/{session['id']}_sessions"))
     # Make directory for this session in the patient's folder
     os.makedirs(f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{session['session_num']}", exist_ok=True)
     # Save the session workspace for data to be stored to
     session["session_workspace"] = f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{session['session_num']}"
-    # Create a JSON file that shows when this session was created
-    with open(f"{session['session_workspace']}/info.JSON", "w") as file:
-        file.write(dumps({"date" : str(datetime.now().date())}, indent=4))
+    # Update the info.JSON file to reflect what testing number this is and the date that it occurred
+    with open(f"./static/patient_data/{session['id']}/{session['id']}_sessions/info.JSON", "r+") as file:
+        session_list = load(file)
+        # Get number of date entries (i.e. number of current sessions)
+        session_list[session["session_num"]] = str(datetime.now().date())
+        file.seek(0)    # Move cursor to beginning
+        file.write(dumps(session_list, indent=4))
+        file.truncate()
 
 # Detect if applications (.exe files) are running
 def is_test_running(process_name):

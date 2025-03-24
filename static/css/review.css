@@ -1,0 +1,66 @@
+/* Import colours from constants.css */
+@import url(constants.css);
+
+/* ------------------------------------------------------------ */
+/* ---------------- Combobox for Data Analysis ---------------- */
+/* ------------------------------------------------------------ */
+
+/* Label that accompanies combobox */
+#combobox-label{
+    padding: 20px 0;
+    padding-right: 40px;
+    font-size: 25pt;
+}
+
+/* Combobox to select date that displays data */
+#test-date-combobox{
+    border: 2px solid var(--button-accent);
+    border-radius: 1.5vh;
+    height: 5vh;
+    width: 12vw;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 14pt;
+    padding-left: 15px;
+}
+
+#test-date-combobox:focus{outline: 2px solid var(--button-accent);}
+
+/* ------------------------------------------------------------ */
+/* --------------- Div and Graph for Radar Chart -------------- */
+/* ------------------------------------------------------------ */
+#radar-chart-div {
+    margin: 25px auto;
+    height: 90vh;
+    display: flex;  /* Enables two-column layout */
+    width: 100%;
+    justify-content: space-between; /* Push elements to sides */
+    align-items: flex-start;
+}
+
+/* Chart container */
+#chart-container {
+    flex: 2;  /* Takes up 50% of the space */
+    display: flex;
+    justify-content: center; /* Ensures canvas is centered inside */
+}
+
+/* Ensure canvas resizes properly */
+#radar-canvas {
+    width: 100% !important; /* Makes sure it scales dynamically */
+    max-width: 800px; /* Prevents it from taking too much space */
+    max-height: 700px; /* Prevents it from taking too much space */
+}
+
+/* Survey results section */
+#full-survey-div {
+    flex: 1; /* Takes up 50% of the space */
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: flex-start; /* Align content to the left */
+    padding-left: 20px; /* Adds spacing from the chart */
+}
+
+/* Reduce the margin spacing between the list title and list items */
+#full-survey-label, #survey-list{
+    margin: 0;
+}

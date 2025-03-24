@@ -2,39 +2,59 @@
     // Connects with Flask main.py file to run tests in backend and process data
 
 
-// Track if the test is currently running for each button
-let isTestRunning = {
-    handmotion: false,
-    speech: false,
-    tremor: false
-};
+// Reset isTestRunning if it already exists, otherwise create it
+if (typeof window.isTestRunning !== "undefined") {
+    window.isTestRunning = { handmotion: false, speech: false, tremor: false };
+} else {
+    window.isTestRunning = { handmotion: false, speech: false, tremor: false };
+}
 
-// Assign variables to all buttons
-const surveyButton = document.getElementById("start-survey-button");
-const handmotionButton = document.getElementById("start-handmotion-button");
-const speechButton = document.getElementById("start-speech-button");
-const tremorButton = document.getElementById("start-tremor-button");
+// Function to safely get or recreate an element
+function getElement(id) {
+    let elem = document.getElementById(id);
+    if (!elem) {
+        console.warn(`Element with ID "${id}" not found.`);
+    }
+    return elem;
+}
 
-// Assign variable name to the "confirm-restart-test" modal
-let restartTestModal = document.getElementById("confirm-restart-test");
-// Assign variable names to "confirm-restart-test" modal yes button, no button, "X" close button
-let yesRestart = document.getElementById("confirm-restart-panel-yes");
-let noRestart = document.getElementById("confirm-restart-panel-no");
-let closeRestart = document.getElementById("close-restart-modal");
+// Buttons
+window.surveyButton = getElement("start-survey-button");
+window.handmotionButton = getElement("start-handmotion-button");
+window.speechButton = getElement("start-speech-button");
+window.tremorButton = getElement("start-tremor-button");
 
-// Assign variables for speech test instructional modal
-const speechTestModal = document.getElementById("speech-test")
-const speechStartSymbol = document.getElementById("start-test-symbol")
+// Modals
+window.restartTestModal = getElement("confirm-restart-test");
+window.speechTestModal = getElement("speech-test");
 
+// Restart modal buttons
+window.yesRestart = getElement("confirm-restart-panel-yes");
+window.noRestart = getElement("confirm-restart-panel-no");
+window.closeRestart = getElement("close-restart-modal");
 
-surveyButton.addEventListener("click", () => buttonClicked("survey", surveyButton))                 // Open up survey
-handmotionButton.addEventListener("click", () => buttonClicked("handmotion", handmotionButton))     // Open up handmotion test
-speechButton.addEventListener("click", () => buttonClicked("speech", speechButton))                 // Open up speech test
-tremorButton.addEventListener("click", () => buttonClicked("tremor", tremorButton))                 // Open up tremor test
+// Speech test UI elements
+window.speechStartSymbol = getElement("start-test-symbol");
 
+// Function to assign event listeners safely
+function assignEventListener(element, event, callback) {
+    if (element && !element.dataset.listenerAdded) {
+        element.addEventListener(event, callback);
+        element.dataset.listenerAdded = "true"; // Mark that an event listener was added
+    }
+}
+
+// Assign event listeners once
+assignEventListener(window.surveyButton, "click", () => buttonClicked("survey", window.surveyButton));
+assignEventListener(window.handmotionButton, "click", () => buttonClicked("handmotion", window.handmotionButton));
+assignEventListener(window.speechButton, "click", () => buttonClicked("speech", window.speechButton));
+assignEventListener(window.tremorButton, "click", () => buttonClicked("tremor", window.tremorButton));
 
 // Check to see if the button needs to be enabled every second using polling
-let polling = setInterval(checkEnableSubmitButton, 1000)
+// let polling = setInterval(checkEnableSubmitButton, 1000)
+
+// Assign event listener to process results when "Analyze Test Results" button is clicked
+document.getElementById("run-algorithm-button").addEventListener("click", processResults)
 
 
 // Connect to main.py file and begin test based on what button was clicked
@@ -116,7 +136,7 @@ function beginTest(button, bodyVar, statusVar) {
             // Close the modal after the form has been submitted
             document.getElementById("survey-test").style.display = "none"
             // If the submit survey button has been clicked, change the complete label to green
-            changeCompleteState(surveyButton, statusVar)
+            changeCompleteState(window.surveyButton, statusVar)
             }, { once: true })
         }
         
@@ -131,7 +151,7 @@ function beginTest(button, bodyVar, statusVar) {
             })
             // After a few seconds (presumably the patient will have started writing by this point, change the "Complete" label colour to green)
             setTimeout(function(){
-                changeCompleteState(handmotionButton, statusVar)
+                changeCompleteState(window.handmotionButton, statusVar)
             },5000)
         }
 
@@ -158,7 +178,7 @@ function beginTest(button, bodyVar, statusVar) {
             })
             // After 15 seconds (presumably the patient will have started testing by this point, change the "Complete" label colour to green)
             setTimeout(function(){
-                changeCompleteState(tremorButton, statusVar)
+                changeCompleteState(window.tremorButton, statusVar)
             },15000)
         }
         isTestRunning[button] = false;
@@ -177,21 +197,11 @@ function changeCompleteState(buttonName, statusVar){
 
 // Check to see if the submit button can be enabled or not
 async function checkEnableSubmitButton(){
-    let response = await fetch("/session-data");        // Wait for fetch to finish loading
+    let response = await fetch("/session_variables");        // Wait for fetch to finish loading
     let sessions = await response.json();
     if (sessions.all_complete){
         document.getElementById("run-algorithm-button").disabled = false
-    }
-}
-
-
-function yesHandler(button, bodyVar, statusVar) {
-    restartTestModal.style.display = "none";
-       // If the test is not running, start the test
-       if (!isTestRunning[button]) {
-        isTestRunning[button] = true;
-        beginTest(button, bodyVar, statusVar);
-  
+        clearInterval(polling) // Clear the polling interval to stop the program from checking every second
     }
 }
 
@@ -203,6 +213,16 @@ function noHandler() {
     yesRestart.parentNode.replaceChild(newYesRestart, yesRestart);
     // Reassign the variable to the new element
     yesRestart = newYesRestart;
+}
+
+function yesHandler(button, bodyVar, statusVar) {
+    restartTestModal.style.display = "none";
+       // If the test is not running, start the test
+       if (!isTestRunning[button]) {
+        isTestRunning[button] = true;
+        beginTest(button, bodyVar, statusVar);
+  
+    }
 }
 
 // Show the modal that has instructions for the speech test
@@ -241,7 +261,7 @@ function openSpeechModal(statusVar) {
     // 2 seconds after the recording is finished close the window
     setTimeout(function(){
         speechTestModal.style.display = "none"
-        changeCompleteState(speechButton, statusVar)
+        changeCompleteState(window.speechButton, statusVar)
     },18000)
     // Change instruction back to "Don't Speak" in case the test is run again
     speechStartSymbol.style.color = "#780000";
@@ -343,3 +363,16 @@ function openSurveyModal(){
     });
 }
 
+// Triggers the machine learning algorithm to start, loads up the process_data.js script
+function processResults() {
+    // Automatically switch to the review_data page
+    fetch(`/content_pages/review.html`)
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById("base-content-div").innerHTML = html;
+        // Load the script associated with each content page
+        const script = document.createElement("script");
+        script.src = "../static/js/process_data.js";
+        document.body.appendChild(script);
+    })
+}

@@ -4,13 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review</title>
-    <style>
-        body{
-            background-color: darksalmon;
-        }
-    </style>
+
 </head>
 <body>
-    <h1>This is the REVIEW.HTML page!</h1>
+    <div id="select-div">
+        <label id="combobox-label" for="combobox"><b>Select the date you wish to view test data from</b></label>
+        <!-- Select element is left empty as it will be filled in by JS fetching and sorting through test sessions -->
+        <select id="test-date-combobox" name="combobox"></select>
+    </div>
+    <!-- Div to create the radar chart and display full survey results -->
+    <div id="radar-chart-div">
+        <div id="chart-container">
+            <canvas id="radar-canvas"></canvas>
+        </div>
+    </div>
 </body>
 </html>
