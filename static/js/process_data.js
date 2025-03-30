@@ -32,7 +32,10 @@ async function chooseDate(){
     // Separate different data results
     let radarData = data.radarData;
     let fullSurvey = data.fullData;
+    let predictions = data.predictions;
+
     plotRadarChart(radarData, fullSurvey)
+    displayPredictions(predictions)
 }
 
 
@@ -136,3 +139,21 @@ async function plotRadarChart(radardata, fullsurvey){
     document.getElementById("radar-chart-div").appendChild(resultsDiv)
 }
 
+// Display the predictions of the ML model in a table
+function displayPredictions(predictions){
+    console.log(predictions)
+
+    // Collect the table and make it visible
+    let results = document.getElementById("predictions-table")
+    results.style.display = ""
+
+    // Fill in each of the cell blocks using the predicitions object
+    document.getElementById("hm-pred").innerHTML = predictions["pred_HM"]
+    document.getElementById("hm-rate").innerHTML = predictions["conf_HM"]
+    document.getElementById("speech-pred").innerHTML = predictions["pred_v"]
+    document.getElementById("speech-rate").innerHTML = predictions["conf_v"]
+    document.getElementById("rt-pred").innerHTML = predictions["pred_RT"]
+    document.getElementById("rt-rate").innerHTML = predictions["conf_RT"]
+    document.getElementById("weighted-rate-row").innerHTML = predictions["weighted_vote"]
+    document.getElementById("prediction-row").innerHTML = predictions["final_class"]
+}

@@ -3,7 +3,7 @@ window.onscroll = function() {scrollHide()};
 
 // Array of objects to hide when scrolling
 let objectsToHide = [document.getElementById("testing-button"),
-    document.getElementById("review-data-button"), document.getElementById("progression-button"),
+    document.getElementById("review-data-button"),// document.getElementById("progression-button"),
     document.getElementById("new-patient-button"),document.getElementById("open-patient-button"),
     document.getElementById("close-patient-button"), document.getElementById("header-id"),
     document.getElementById("header-dob"), document.getElementById("header-age"),

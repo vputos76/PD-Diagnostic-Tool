@@ -35,12 +35,11 @@
 #test-table td {
     text-align: center;
     padding: 10px;
-    
-    height: 1vh; /* Adjust based on your preference */
+    height: 1vh;
 }
 
 #test-table tr, tbody {
-    height: 1vh; /* Adjust based on your preference */
+    height: 1vh;
 }
 .divided-row{
     border-bottom: 3px solid var(--button-accent);

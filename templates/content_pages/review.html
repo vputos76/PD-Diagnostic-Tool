@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review</title>
-
 </head>
 <body>
     <div id="select-div">
@@ -17,6 +16,43 @@
         <div id="chart-container">
             <canvas id="radar-canvas"></canvas>
         </div>
+    </div>
+
+    <h2 id="pred-summary">Prediction Summary</h2>
+    <!-- Div to create the prediction results table -->
+    <div id="prediction-results-div">
+        <table id="predictions-table">
+            <thead> <!-- Leave majority of table spaces empty, as they will be filled in by JavaScript --> 
+                <th>Test</th>
+                <th>Prediction</th>
+                <th>Confidence Rate</th>
+            </thead>
+            <tbody>
+                <tr class="divided-row">
+                    <td class="table-category"><b>Handmotion</b></td>
+                    <td id="hm-pred" class="table-data">asd</td>
+                    <td id="hm-rate" class="table-data">tyui</td>
+                </tr>
+                <tr class="divided-row">
+                    <td class="table-category"><b>Speech</b></td>
+                    <td id="speech-pred" class="table-data">asd</td>
+                    <td id="speech-rate" class="table-data">tyui</td>
+                </tr>
+                <tr id="last-test-row" class="divided-row">
+                    <td class="table-category"><b>Resting Tremor</b></td>
+                    <td id="rt-pred" class="table-data">asd</td>
+                    <td id="rt-rate" class="table-data">tyui</td>
+                </tr>
+                <tr class="divided-row summary-row">
+                    <td class="table-category"><b>Weighted Vote</b></td>
+                    <td id="weighted-rate-row" class="table-data">asd</td>
+                </tr>
+                <tr class="summary-row">
+                    <td class="table-category"><b>Prediction</b></td>
+                    <td id="prediction-row" class="table-data">asd</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

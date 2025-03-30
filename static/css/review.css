@@ -64,3 +64,59 @@
 #full-survey-label, #survey-list{
     margin: 0;
 }
+
+/* ------------------------------------------------------------ */
+/* ----------------- Predictions Table and Div ---------------- */
+/* ------------------------------------------------------------ */
+#pred-summary{
+    color: var(--button-active);
+    font-size: 5vh;
+}
+
+#predictions-table{
+    width: 60%;
+    border: 2px solid var(--button);
+    border-collapse: collapse;
+    margin: 5vh auto;
+    table-layout: fixed;
+}
+
+/* Table header row */
+#predictions-table thead {
+    top: 0;
+    background-color: var(--button); /* Ensure the header remains visible */
+    color: var(--whitefont);
+    font-size:x-large;
+}
+
+/* Control table header */
+#predictions-table th {
+    text-align: center;
+    line-height: 3vh;
+    padding: 8px; /* Add padding for better spacing */
+}
+
+/* Ensure table cells (`<td>`) also take full width */
+#predictions-table td {
+    height: 1vh;
+}
+
+.divided-row{
+    border-bottom: 3px solid var(--button);
+}
+
+/* Specifically devide the wighted vote and prediction lines from three test results */
+#last-test-row{
+    border-bottom: 20px solid var(--button-accent);
+}
+
+/* Ensure that the text in the last two rows is left-justified since it spans two columns and the other rows are centered */
+.table-category{
+    padding: 10px 0px 10px 4vw ;
+    font-size: large;
+    text-align: left;
+}
+
+.table-data{
+    text-align: center;
+}

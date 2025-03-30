@@ -27,7 +27,7 @@ window.tremorButton = getElement("start-tremor-button");
 // Modals
 window.restartTestModal = getElement("confirm-restart-test");
 window.speechTestModal = getElement("speech-test");
-
+window.loadingModal = getElement("load-screen-modal");
 // Restart modal buttons
 window.yesRestart = getElement("confirm-restart-panel-yes");
 window.noRestart = getElement("confirm-restart-panel-no");
@@ -51,7 +51,7 @@ assignEventListener(window.speechButton, "click", () => buttonClicked("speech", 
 assignEventListener(window.tremorButton, "click", () => buttonClicked("tremor", window.tremorButton));
 
 // Check to see if the button needs to be enabled every second using polling
-// let polling = setInterval(checkEnableSubmitButton, 1000)
+let polling = setInterval(checkEnableSubmitButton, 1000)
 
 // Assign event listener to process results when "Analyze Test Results" button is clicked
 document.getElementById("run-algorithm-button").addEventListener("click", processResults)
@@ -221,7 +221,6 @@ function yesHandler(button, bodyVar, statusVar) {
        if (!isTestRunning[button]) {
         isTestRunning[button] = true;
         beginTest(button, bodyVar, statusVar);
-  
     }
 }
 
@@ -297,7 +296,7 @@ function openSurveyModal(){
         "GASTROINTESTINAL ISSUES / CONSTIPATION - Nausea; vomiting; diarrhea; infrequent bowel movements.",
         "SEXUAL CONCERNS - Changes in sexual desire or erectile dysfunction.",
         "HALLUCINATIONS - Seeing, hearing or sensing things that are not there.",
-        "DELUSIONS - Believing things that are not true, e.g. Everyone is ststaring at me when I walk outside.",
+        "DELUSIONS - Believing things that are not true, e.g. Everyone is staring at me when I walk outside.",
         "URINARY FREQUENCY - The need to urinate often.",
         "URINARY URGENCY - The feeling that one must urinate right away, even if the bladder is not full.",
         "URINARY INCONTINENCE - The loss of bladder control, resulting in leakage of urine.",];
@@ -366,13 +365,22 @@ function openSurveyModal(){
 // Triggers the machine learning algorithm to start, loads up the process_data.js script
 function processResults() {
     // Automatically switch to the review_data page
-    fetch(`/content_pages/review.html`)
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById("base-content-div").innerHTML = html;
-        // Load the script associated with each content page
-        const script = document.createElement("script");
-        script.src = "../static/js/process_data.js";
-        document.body.appendChild(script);
-    })
+    fetch(`/run_algorithm`)
+    // While the algorithm runs, start this loading screen to keep the user occupied visually (and prevent them from clicking on anything else)
+    window.loadingModal.style.display = "flex"
+    
+    // After the time limit, the model should be done processing data
+    setTimeout(function(){
+        window.loadingModal.style.display = "none"
+        fetch(`/content_pages/review.html`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("base-content-div").innerHTML = html;
+            // Load the script associated with each content page
+            const script = document.createElement("script");
+            script.src = "../static/js/process_data.js";
+            document.body.appendChild(script);
+        })
+        window.scrollTo(0,0) // Scroll to top of screen
+    },9000)
 }

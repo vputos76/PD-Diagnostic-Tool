@@ -4,13 +4,15 @@ from datetime import datetime                   # Work out patient age from birt
 from flask import Flask, render_template, jsonify, redirect, request, url_for, session, send_from_directory
 from json import load, dumps, dump              # To read JSON-stored patient data
 from pandas import read_csv                     # Used to read survey data to create radar charts in JS
+from pprint import pprint                       # Display prediction results in a readable format
 from psutil import process_iter                 # Used to get hold of running application windows
 from pygetwindow import getWindowsWithTitle     # Used to open and close PressureTest.exe window to ensure functionality
 from random import randint                      # Used to generate random patient ID
 from shutil import copy, move                   # Used to copy profile photos from images to patient directory
 from time import sleep                          # Sleep when switching between incorrect/correct login page
 import os                                       # Determine which user is using the program
-import utils
+from utils.sound_recording import record_audio  # Used to record microphone samples
+from prediction import run_prediction           # Run prediction on handmotion and voice samples
 
 app = Flask(__name__)
 app.secret_key = "capstone_25"
@@ -180,13 +182,13 @@ def create_patient():
 # Render .html pages based when a button is clicked in the header panel
 @app.route("/<path:page>")
 def load_page(page):
-    # session["session_num"] = 1
-    # session["session_workspace"] = "./static/patient_data/0123456/0123456_sessions/session_1"
-    # session["all_complete"] = True
-    # session["handmotion_completed"] = "Complete"
-    # session["speech_completed"] = "Complete"
-    # session["survey_completed"] = "Complete"
-    # session["tremor_completed"] = "Complete"
+    session["session_num"] = 1
+    session["session_workspace"] = "./static/patient_data/9098978/9098978_sessions/session_1"
+    session["all_complete"] = True
+    session["handmotion_completed"] = "Complete"
+    session["speech_completed"] = "Complete"
+    session["survey_completed"] = "Complete"
+    session["tremor_completed"] = "Complete"
     return render_template(page)
 
 # Based on the "run test" button clicked, trigger one of the hardware data collection methods to open
@@ -207,7 +209,6 @@ def run_test():
 
         # Create a dictionary that mimics the survey results, but with numerical results
         mapped_data = {key: survey_map.get(value) for key, value in data.items()}
-
         # Set categories and associated question topics to be used in radar graph in {category: [(question, score), ...], ...} format
         radar_categories = {
             "Sexual Concerns" : [("Sexual Concerns", mapped_data["question1"])],
@@ -286,7 +287,7 @@ def run_test():
     # If the Speech trial button is clicked
     elif test_type == ("speech"):
         # Start the recording, and record the status value as complete
-        utils.sound_recording.record_audio(keyword="Microphone (Yeti Stereo Microph")
+        record_audio(keyword="Microphone (Yeti Stereo Microph")
         session["speech_completed"] = "Complete"
         # Move the data
         move(os.path.join(os.getcwd(), "speech_test.wav"), os.path.join(os.getcwd(), session["session_workspace"], "speech_test.wav"))
@@ -308,7 +309,7 @@ def run_test():
         # Create path to data file ("data_0.csv" is WitMotion's standard naming convention for data files)
         dataPath = os.path.join(dataDir, recordFolder, mostRecent, "data_0.csv")
         # Create path where data should be moved to
-        targetPath = os.path.join(os.getcwd(), session["session_workspace"], f"{session['id']}_tremor.csv")
+        targetPath = os.path.join(os.getcwd(), session["session_workspace"], "tremor.csv")
 
         move(dataPath, targetPath)
         session["tremor_completed"] = "Complete"
@@ -324,6 +325,20 @@ def run_test():
 def session_vars():
     return(jsonify(session))
 
+
+# Run the machine learning algorithm
+@app.route('/run_algorithm')
+def run_algorithm():
+    print("Running the algorithm!")
+    # Run prediction on handmotion, voice samples, tremor samples
+    predictions = run_prediction(f"{session['session_workspace']}/pressure.csv", f"{session['session_workspace']}/speech_test.wav", f"{session['session_workspace']}/tremor.csv")
+    pprint(predictions, sort_dicts=False)
+    # Write information to a JSON file
+    with open(f"{session['session_workspace']}/{session['session_num']}_predictions.JSON", "w") as file:
+        file.write(dumps(predictions, indent=4))
+    return jsonify({"Status" : "Predictions completed successfully"})
+
+
 # Return data files associated with each session
 @app.route('/session_data/<sessionNum>')
 def session_data(sessionNum):
@@ -333,9 +348,14 @@ def session_data(sessionNum):
     # Convert data to pandas dataframe to return to JS
     averaged_data = read_csv(averaged_survey_path).to_dict(orient="records")
     full_data = read_csv(full_survey_path).to_dict(orient="records")
+    # Read in prediction data
+    with open(f"./static/patient_data/{session['id']}/{session['id']}_sessions/session_{sessionNum}/{sessionNum}_predictions.JSON") as file:
+        predictions = load(file)
+
     return jsonify({
         "radarData" : averaged_data,
-        "fullData" : full_data
+        "fullData" : full_data,
+        "predictions" : predictions
     })
 
 # Collect each of the session dates to fill in the Review page select combobox

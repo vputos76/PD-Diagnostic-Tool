@@ -55,12 +55,13 @@
         <td class="divided-row" colspan="3">
           <!-- Drop-down text to show testing guidelines -->
           <details class="test-details" id="handmotion-details">
-            <summary><b>Click for Hand Motion Test gidelines</b></summary>
+            <summary><b>Click for Hand Motion Test Guidelines</b></summary>
             <ol>
               <li>Ensure the patient is sitting near a firm surface and is positioned appropriately to write.</li>
               <li>The system's drawing tablet and stylus should be available, with a spiral drawing page taped to the tablet surface.</li>
               <li>Click the "Start Test" button. A new window should load over the existing screen.</li>
-              <li>Instruct the patient to begin tracing the spiral from the inside in one motion (i.e. without lifting the pen).</li>
+              <li>Instruct the patient to begin tracing the spiral from the inside in one motion.</li>
+              <ul><li>The patient should not be resting their wrist on the tablet while writing.</li></ul>
               <li>Once the test is complete, close the window. The data will be automatically saved and moved to the patient's file.</li>
             </ol>
           </details>
@@ -80,7 +81,7 @@
         <td class="divided-row" colspan="3">
           <!-- Drop-down text to show testing guidelines -->
           <details class="test-details" id="speech-details">
-            <summary><b>Click for Speech Test gidelines</b></summary>
+            <summary><b>Click for Speech Test Guidelines</b></summary>
             <ol>
               <li>Ensure the test is being conducted in a quiet environment, and click the "Start Test" button.</li>
               <ul><li>The patient should be sitting close to the microphone, with the device in an upright position.</li></ul>
@@ -108,7 +109,7 @@
         <td colspan="3">                <!-- This row does not have the "divided-row" class so the bottom border doesn't appear -->
           <!-- Drop-down text to show testing guidelines -->
           <details class="test-details" id="tremor-details">
-            <summary><b>Click for Tremor Test gideline</b></summary>
+            <summary><b>Click for Tremor Test Guidelines</b></summary>
             <ol>
               <li>Ensure the accelerometer's wristband is fastened securely around the patient's dominant wrist, and the device is facing upright.</li>
               <li>Activate the device by moving the side switch to the "On" position.</li>
@@ -174,7 +175,6 @@
     </div>
   </div>
 
-
   <div id="survey-test" class="modal">
     <div id="survey-test-content" class="modal-content">
       <div id="form-container">
@@ -187,6 +187,19 @@
     </div>
   </div>
 
+  <!-- Content for loading screen that shows like a display modal (meant to keep the user occupied while algorithm runs)-->
+  <div id="load-screen-modal" class="modal">
+    <div class='waitContent'>
+      <div class='ball'></div>
+      <div class='ball'></div>
+      <div class='ball'></div>
+      <div class='ball'></div>
+      <div class='ball'></div>
+      <div class='ball'></div>
+      <div class='ball'></div>
+      <div class='ball'></div>
+    </div>
+  </div>
 </body>
 
 <script src="{{ url_for('static', filename='js/process_data.js') }}"></script>
