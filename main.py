@@ -1,11 +1,11 @@
 # To render website and load HTML templates
 from csv import writer                          # Write survey data to .csv format
 from datetime import datetime                   # Work out patient age from birthday
-from flask import Flask, render_template, jsonify, redirect, request, url_for, session, send_from_directory
+from flask import Flask, render_template, jsonify, redirect, request, url_for, session, send_from_directory, abort
 from json import load, dumps, dump              # To read JSON-stored patient data
 from pandas import read_csv                     # Used to read survey data to create radar charts in JS
 from pprint import pprint                       # Display prediction results in a readable format
-from psutil import process_iter                 # Used to get hold of running application windows
+from psutil import process_iter, Process        # Used to get hold of running application windows
 from pygetwindow import getWindowsWithTitle     # Used to open and close PressureTest.exe window to ensure functionality
 from random import randint                      # Used to generate random patient ID
 from shutil import copy, move                   # Used to copy profile photos from images to patient directory
@@ -13,6 +13,7 @@ from time import sleep                          # Sleep when switching between i
 import os                                       # Determine which user is using the program
 from utils.sound_recording import record_audio  # Used to record microphone samples
 from prediction import run_prediction           # Run prediction on handmotion and voice samples
+from win32gui import FindWindow
 
 app = Flask(__name__)
 app.secret_key = "capstone_25"
@@ -60,6 +61,8 @@ def search_logins():
 # Return JSON object of all patients
 @app.route('/get_patients')
 def search_patients():
+    if request.headers.get('X-Requested-With') != 'Flask-App':
+        abort(403)  # Forbidden access via url
     with open("static/patient_data/patient_database.json") as file:
         master_json_data = load(file)
         return jsonify(master_json_data) 
@@ -67,6 +70,8 @@ def search_patients():
 # Return JSON object of single patient from master patient list
 @app.route('/get_patients/<patient_id>')
 def get_patient(patient_id):
+    if request.headers.get('X-Requested-With') != 'Flask-App':
+        abort(403)  # Forbidden access via url
     # If the patient ID == 0, it is the "no patient" default case
     if patient_id == "0":
         file_name = "static/patient_data/no_patient/no_patient.json"
@@ -119,9 +124,9 @@ def get_patient(patient_id):
         del session["session_workspace"]
     return jsonify(patient_data)
    
+# Get username from Flask session, default to "Guest"
 @app.route('/home')
 def homescreen():
-    # Get username from Flask session, default to "Guest"
     return render_template("base.html", user=session["user"], session=session)
 
 # Return JSON object of single patient from master patient list
@@ -182,13 +187,13 @@ def create_patient():
 # Render .html pages based when a button is clicked in the header panel
 @app.route("/<path:page>")
 def load_page(page):
-    session["session_num"] = 1
-    session["session_workspace"] = "./static/patient_data/9098978/9098978_sessions/session_1"
-    session["all_complete"] = True
-    session["handmotion_completed"] = "Complete"
-    session["speech_completed"] = "Complete"
-    session["survey_completed"] = "Complete"
-    session["tremor_completed"] = "Complete"
+    # session["session_num"] = 1
+    # session["session_workspace"] = "./static/patient_data/9098978/9098978_sessions/session_1"
+    # session["all_complete"] = True
+    # session["handmotion_completed"] = "Complete"
+    # session["speech_completed"] = "Complete"
+    # session["survey_completed"] = "Complete"
+    # session["tremor_completed"] = "Complete"
     return render_template(page)
 
 # Based on the "run test" button clicked, trigger one of the hardware data collection methods to open
@@ -267,7 +272,7 @@ def run_test():
     elif test_type == ("handmotion"):
         os.startfile(r"..\WakumTest\Wakum\Wintab Pressure Test\SampleCode\Debug\PressureTest")
         # NOTE For some reason the program does not open properly and record pen pressure until the window is minimized and opened again. This automatically completes this prociedure
-        sleep(0.1)
+        sleep(0.3)
         for window in getWindowsWithTitle("PressureTest"):
             if "PressureTest" in window.title:
                 app_window = window
@@ -279,8 +284,6 @@ def run_test():
         # While the test is running, the program should do nothing (i.e. just let data be recorded)
         while is_test_running("PressureTest.exe"):
             pass
-        # Once the window is closed (data is no longer being recorded), save the data in the session file and return to the test selection screen
-        move(os.path.join(os.getcwd(), "pressure.csv"), os.path.join(session["session_workspace"], "pressure.csv"))
         session["handmotion_completed"] = "Complete"
 
 
@@ -299,19 +302,6 @@ def run_test():
         os.startfile(r"C:\WitMotion(V2024.12.27.0)/WitMotion")
         while is_test_running("WitMotion.exe"):
             pass
-        # Define current WitMotion file storage directory
-        dataDir = r"C:\WitMotion(V2024.12.27.0)\Record"
-        # Determine current date to find folder in Record folder
-        recordFolder = str(datetime.now().date())
-        # Get the most recent data file from the data folder for today's date (i.e. the test that just finished)
-        mostRecent = os.listdir(os.path.join(dataDir, recordFolder))[-1]
-
-        # Create path to data file ("data_0.csv" is WitMotion's standard naming convention for data files)
-        dataPath = os.path.join(dataDir, recordFolder, mostRecent, "data_0.csv")
-        # Create path where data should be moved to
-        targetPath = os.path.join(os.getcwd(), session["session_workspace"], "tremor.csv")
-
-        move(dataPath, targetPath)
         session["tremor_completed"] = "Complete"
 
     # Check to see if all of the tests have been compelted
@@ -319,6 +309,34 @@ def run_test():
         session["all_complete"] = True
 
     return jsonify({"Status" : "Trial completed successfully"})
+
+# Due to difficulties with getting software to completely stop running in the background, is_test_running continues indefinitely, causing problems
+    # JS "".then" method in combination with this route is a workaround
+@app.route("/relocate_hm_data", methods=["POST"])
+def relocate_hm_data():
+        move(os.path.join(os.getcwd(), "pressure.csv"), os.path.join(session["session_workspace"], "pressure.csv"))
+
+        
+# Due to difficulties with getting WitMotion software to completely stop running in the background, is_test_running continues indefinitely, causing problems
+    # JS "".then" method in combination with this route is a workaround
+@app.route("/relocate_tremor_data", methods=["POST"])
+def relocate_tremor_data():
+    # Define current WitMotion file storage directory
+    dataDir = r"C:\WitMotion(V2024.12.27.0)\Record"
+    # Determine current date to find folder in Record folder
+    recordFolder = str(datetime.now().date())
+    # Get the most recent data file from the data folder for today's date (i.e. the test that just finished)
+    mostRecent = os.listdir(os.path.join(dataDir, recordFolder))[-1]
+
+    # Create path to data file ("data_0.csv" is WitMotion's standard naming convention for data files)
+    dataPath = os.path.join(dataDir, recordFolder, mostRecent, "data_0.csv")
+    # Create path where data should be moved to
+    targetPath = os.path.join(os.getcwd(), session["session_workspace"], "tremor.csv")
+    print(dataPath)
+    print(targetPath)
+    move(dataPath, targetPath)
+    return jsonify({"Status" : "Data relocated successfully"})
+
 
 # Return data files associated with each session
 @app.route('/session_variables')
@@ -390,6 +408,14 @@ def is_test_running(process_name):
         if process.info['name'] and process_name.lower() in process.info['name'].lower():
             return True
     return False
+
+
+    # for process in process_iter(['pid', 'name', 'ppid']):
+    #     if process.info['name'] and process_name.lower() in process.info['name'].lower():
+    #         parent = Process(process.info['ppid']) if process.info['ppid'] else None
+    #         if parent and process_name.lower() in parent.name().lower():
+    #             return True  # Process is a child of the main app
+    # return False
 
 ######################################################################################################
 ###----------------------------------------------Main----------------------------------------------###

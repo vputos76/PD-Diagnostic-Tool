@@ -3,15 +3,16 @@ import pickle
 import pandas as pd
 from feature_extraction import HandMotionFeatureExtractor, Feature_Extraction_v, FeatureExtractor_RT
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from pprint import pprint
 
 def run_prediction(hm, voice, rt):
 
-    patientfile_HM = "utils/test_ML_patient_data/pressure.csv"
-    patientfile_v = "utils/test_ML_patient_data/AH_545616858-3A749CBC-3FEB-4D35-820E-E45C3E5B9B6A.wav"
-    patientfile_RT = "utils/test_ML_patient_data/RT_test.csv"
-    # patientfile_HM = hm
-    # patientfile_v = voice
-    # patientfile_RT = rt
+    # patientfile_HM = "utils/test_ML_patient_data/pressure.csv"
+    # patientfile_v = "utils/test_ML_patient_data/AH_545616858-3A749CBC-3FEB-4D35-820E-E45C3E5B9B6A.wav"
+    # patientfile_RT = "utils/test_ML_patient_data/RT_test.csv"
+    patientfile_HM = hm
+    patientfile_v = voice
+    patientfile_RT = rt
     ################################ Hand Motion ##################################################
     extractor = HandMotionFeatureExtractor()  
     extractor.extract_features(patientfile_HM)  
@@ -35,11 +36,11 @@ def run_prediction(hm, voice, rt):
     extractor_v.remove_noise_and_trim(patientfile_v, "utils/test_ML_patient_data/output_test.wav")
     df_v = extractor_v.extract_voice_features("utils/test_ML_patient_data/output_test.wav", 20, 16000, "Hertz")
 
-    with open("utils/trained_models/scaler_knn_v_2.pkl", "rb") as f:
+    with open("utils/trained_models/scaler_knn_v.pkl", "rb") as f:
         scaler_v = pickle.load(f)
     # with open("trained_models/pca_v.pkl", "rb") as f:
     #     pca_v = pickle.load(f)
-    with open("utils/trained_models/new_best_KNN_model_voice.pkl", "rb") as f:
+    with open("utils/trained_models/KNN_model_voice.pkl", "rb") as f:
         best_model_v = pickle.load(f)
 
     scaled_data_v = scaler_v.transform(df_v)
@@ -52,11 +53,11 @@ def run_prediction(hm, voice, rt):
     extractor_RT = FeatureExtractor_RT()
     df_RT = extractor_RT.process_dataframe(patientfile_RT)
 
-    with open("utils/trained_models/scaler_RT.pkl", "rb") as f:
+    with open("utils/trained_models/scaler_rf.pkl", "rb") as f:
         scaler_rt = pickle.load(f)
     # with open("trained_models/pca_v.pkl", "rb") as f:
     #     pca_v = pickle.load(f)
-    with open("utils/trained_models/best_rf_model_RT_1.pkl", "rb") as f:
+    with open("utils/trained_models/best_rf_model_RT.pkl", "rb") as f:
         best_model_rt = pickle.load(f)
 
     scaled_data_RT = scaler_rt.transform(df_RT)
@@ -90,17 +91,22 @@ def run_prediction(hm, voice, rt):
     # ], columns=["Model", "Prediction", "Confidence"])
 
     results_dict = {
-        "conf_HM": str(conf_HM),
-        "conf_v": str(conf_v),
-        "conf_RT": str(conf_RT),
-        "pred_HM": str(pred_HM),
-        "pred_v": str(pred_v),
-        "pred_RT": str(pred_RT),
-        "weighted_vote": str(weighted_vote),
-        "final_class": str(final_class)
+        "conf_HM": round(float(conf_HM), 3),
+        "conf_v": round(float(conf_v), 3),
+        "conf_RT": round(float(conf_RT), 3),
+        "pred_HM": round(float(pred_HM), 3),
+        "pred_v": round(float(pred_v), 3),
+        "pred_RT": round(float(pred_RT), 3),
+        "weighted_vote": round(float(weighted_vote), 3),
+        "final_class": round(float(final_class), 3)
     }
 
     return results_dict
 
 if __name__ == "__main__":
-    x = run_prediction()
+    x = run_prediction(
+        hm="static/patient_data/4067391/4067391_sessions/session_2/pressure.csv",
+        voice="static/patient_data/4067391/4067391_sessions/session_2/speech_test.wav",
+        rt="static/patient_data/4067391/4067391_sessions/session_2/tremor.csv")
+    
+    pprint(x, sort_dicts=False)

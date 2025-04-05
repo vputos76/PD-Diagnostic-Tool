@@ -179,9 +179,9 @@
         let closeConfirmModalNo = document.getElementById("confirm-close-panel-no");
         // When the user clicks the button, the modal display changes from "none" to "block"
         confirmCloseButton.onclick = function() {confirmCloseModal.style.display = "block";}        
-        // When the user clicks the "X" button, the modal display changes from "block" to "none", closing it
+        // When the user clicks the "X" button or the "No", the modal display changes from "block" to "none", closing it
         closeConfirmModal.onclick = function() {confirmCloseModal.style.display = "none";}
-        closeConfirmModalNo.ondblclick = function() {confirmCloseModal.style.display = "none";}
+        closeConfirmModalNo.onclick = function() {confirmCloseModal.style.display = "none";}
   
     </script>
     <!-- Set script for external JS functions -->

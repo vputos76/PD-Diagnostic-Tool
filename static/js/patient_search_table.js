@@ -9,7 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function fetchPatients() {
     let visibleIndex = 0; // Keeps track of visible row index for striping
-    fetch("/get_patients")
+    fetch("/get_patients", {
+        headers: {'X-Requested-With': 'Flask-App'}
+    },)
 
         .then(response => response.json())
         .then(data => {
@@ -97,13 +99,16 @@ function filterPatients() {
 }
 
 function closePatient() {
-    document.getElementById("confirm-close-modal").style.display = "none"
-    loadPatient("0")
+    location.reload() // Reloading the page resets all content (start from scratch)
+    // document.getElementById("confirm-close-modal").style.display = "none"
+    // loadPatient("0")
 }
 
 
 function loadPatient(patient_ID) {
-    fetch(`/get_patients/${patient_ID}`)
+    fetch(`/get_patients/${patient_ID}`, {
+        headers: {'X-Requested-With': 'Flask-App'}
+    },)
         .then(response => response.json())
         .then(patient => updatePatientInfo(patient))
         .then(state => buttonPanelState(patient_ID))

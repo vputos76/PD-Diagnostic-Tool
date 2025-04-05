@@ -10,6 +10,7 @@
     padding: 20px 0;
     padding-right: 40px;
     font-size: 25pt;
+    color: var(--button-active);
 }
 
 /* Combobox to select date that displays data */

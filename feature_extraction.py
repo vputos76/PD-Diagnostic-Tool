@@ -10,7 +10,6 @@ from scipy.signal import argrelextrema
 from pydub import AudioSegment, silence
 from pydub.effects import low_pass_filter, high_pass_filter
 
-
 import scipy.signal as signal
 from scipy.signal import hilbert
 from scipy.integrate import trapezoid
@@ -73,7 +72,7 @@ class Feature_Extraction_v:
             ## Additional nonlinear features using librosa
             y, sr = librosa.load(voice_sample, sr=sr)
 
-            ## 1st and 2nd spectral spread
+            # 1st and 2nd spectral spread
             D = np.abs(librosa.stft(y))**2
             freqs = librosa.fft_frequencies(sr=sr)
             # Find first two formants (approximate using spectral peaks)
@@ -88,7 +87,7 @@ class Feature_Extraction_v:
             else:
                 spread1, spread2 = np.nan, np.nan  # Avoid crashing if formants are not found
 
-            ## Correlation dimension of speech signal
+            # ## Correlation dimension of speech signal
             d2 = nolds.corr_dim(y[:5000], emb_dim=10)  # Use only first 5000 samples
 
             ###### RPDE calculation
@@ -127,10 +126,11 @@ class Feature_Extraction_v:
             df_voice_features = pd.DataFrame(
                 [[f0_mean, f0_maximum, f0_minimum, jitter_relative, jitter_absolute, jitter_rap, jitter_ppq5, jitter_ddp,
                 shimmer_relative, shimmer_localDb, shimmer_apq3, shimmer_apq5, shimmer_apq, shimmer_dda,
-                nhr, hnr, rpde, dfa, spread1, spread2, d2, ppe]],
+                nhr, hnr, rpde, dfa, spread1, spread2, d2, ppe]], 
+                # rpde, dfa, spread1, spread2, d2, ppe]],
                 columns=['MDVP:Fo', 'MDVP:Fhi', 'MDVP:Flo', 'MDVP:Jitter', 'MDVP:Jitter.1', 'MDVP:RAP', 'MDVP:PPQ', 'Jitter:DDP',
                         'MDVP:Shimmer', 'MDVP:Shimmer.1', 'Shimmer:APQ3', 'Shimmer:APQ5', 'MDVP:APQ', 'Shimmer:DDA',
-                        'NHR','HNR', 'RPDE', 'DFA', 'spread1', 'spread2', 'D2', 'PPE']
+                        'NHR','HNR','RPDE', 'DFA', 'spread1', 'spread2', 'D2', 'PPE']
             )
             
             return df_voice_features
@@ -213,6 +213,15 @@ class FeatureExtractor_RT:
     def compute_rms_acceleration(self, df):
         return np.sqrt((df["X"]**2 + df["Y"]**2 + df["Z"]**2) / 3)
 
+    def compute_absolute_mean(self, df):
+        # Compute the absolute mean of the data across all three axes
+        abs_mean = np.mean(np.abs(df["X"])) + np.mean(np.abs(df["Y"])) + np.mean(np.abs(df["Z"]))
+        return abs_mean
+
+    def compute_variance(self, df):
+        # Compute the variance across all three axes and return the mean variance
+        return np.var(df["X"]), np.var(df["Y"]), np.var(df["Z"])
+
     def compute_sample_entropy(self, df_rms, m=2, r=0.2):
         N = len(df_rms)
         r *= np.std(df_rms)
@@ -240,24 +249,33 @@ class FeatureExtractor_RT:
         auc_power = trapezoid(psd, freqs)
         mean_acc = np.mean(np.abs(acc_mag))
         total_energy = trapezoid(psd_x, freqs) + trapezoid(psd_y, freqs) + trapezoid(psd_z, freqs)
-        return peak_power, peak_freq, total_energy, auc_power, mean_acc
+        mean_power_frequency = np.sum(freqs * psd) / np.sum(psd)
+        
+        return peak_power, total_energy, auc_power, mean_acc, mean_power_frequency
 
     def process_dataframe(self, patientfile):
-        df = pd.read_csv(patientfile)
-        df = df.drop(columns=["DeviceName", "AsX(°/s)", "AsY(°/s)", "AsZ(°/s)", "AngleX(°)", "AngleY(°)", "AngleZ(°)", "HX(uT)", "HY(uT)", "HZ(uT)", "Q0()", "Q1()", "Q2()", "Q3()", "Temperature(°C)", "Version()", "Battery level(%)"])
+        df = pd.read_csv(patientfile, index_col=1)
+        df = df[['Time', 'Acceleration X(g)', 'Acceleration Y(g)','Acceleration Z(g)']]
         df.columns = ['Time', 'X', 'Y', 'Z']
         df['X']= df['X'].values*(-1)
         for axis in ['X', 'Y', 'Z']:
             df[axis] = self.bandpass_filter(df[axis])
         df_rms = self.compute_rms_acceleration(df)
         sample_entropy = self.compute_sample_entropy(df_rms)
-        peak_power, peak_freq, total_energy, auc_power, mean_acc = self.compute_psd_features(df)
+        var_x, var_y, var_z = self.compute_variance(df)
+        peak_power, total_energy, auc_power, mean_acc, mean_power_frequency= self.compute_psd_features(df)
+        abs_mean = self.compute_absolute_mean(df)
+
         features = {
             "peak_power": peak_power,
-            "peak_freq": peak_freq,
             "auc_power": auc_power,
             "total_energy": total_energy,
             "sample_entropy": sample_entropy,
-            "mean_acceleration": mean_acc
+            "mean_acceleration": mean_acc,
+            "variance_X": var_x,
+            "variance_Y": var_y,
+            "variance_Z": var_z,
+            "mean_power_frequency": mean_power_frequency,
+            "absolute_mean": abs_mean
         }
         return pd.DataFrame([features])

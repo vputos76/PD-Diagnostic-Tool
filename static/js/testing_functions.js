@@ -149,6 +149,16 @@ function beginTest(button, bodyVar, statusVar) {
                 },
                 body: formData.toString()
             })
+            // Run data relocation process afterwards
+            .then(data => {
+                return fetch("/relocate_hm_data", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded", 
+                    },
+                    body: formData.toString()
+                });
+            })
             // After a few seconds (presumably the patient will have started writing by this point, change the "Complete" label colour to green)
             setTimeout(function(){
                 changeCompleteState(window.handmotionButton, statusVar)
@@ -168,7 +178,7 @@ function beginTest(button, bodyVar, statusVar) {
         }
 
         // Run tremor test
-        if (bodyVar === "test_type=tremor"){
+        if (bodyVar === "test_type=tremor") {
             fetch("/start_test", {
                 method: "POST",
                 headers: {
@@ -176,6 +186,29 @@ function beginTest(button, bodyVar, statusVar) {
                 },
                 body: formData.toString()
             })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to start test");
+                }
+                return response.json();
+            })
+            // Run data relocation process afterwards
+            .then(data => {
+                return fetch("/relocate_tremor_data", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded", 
+                    },
+                    body: formData.toString()
+                });
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to relocate data");
+                }
+                return response.json();
+            })
+
             // After 15 seconds (presumably the patient will have started testing by this point, change the "Complete" label colour to green)
             setTimeout(function(){
                 changeCompleteState(window.tremorButton, statusVar)
@@ -234,34 +267,35 @@ function openSpeechModal(statusVar) {
     // Tell the patient to speak
     setTimeout(function(){
         speechStartSymbol.style.color = "#27969e";
-        speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;10";
+        speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;5";
     },4000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;9"},5000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;8"},6000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;7"},7000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;6"},8000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;5"},9000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;4"},10000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;3"},11000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;2"},12000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;1"},13000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;4"},5000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;3"},6000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;2"},7000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;1"},8000)
+    // Changed to switch test to 10 seconds, delay times have been adjusted
+    // setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;5"},9000)
+    // setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;4"},10000)
+    // setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;3"},11000)
+    // setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;2"},12000)
+    // setTimeout(function(){speechStartSymbol.innerHTML = "Speak&nbsp;&nbsp;&nbsp;1"},13000)
     // The user should not speak for the final 2 seconds of the test
     setTimeout(function(){
         speechStartSymbol.style.color = "#780000";
         speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;2";
-    },14000)
-    setTimeout(function(){speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;1"},15000)
+    },9000)
+    setTimeout(function(){speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;1"},10000)
     
     // Let the user know that the recording has finished
     setTimeout(function(){
         speechStartSymbol.style.color = "#024308";
         speechStartSymbol.innerHTML = "Recording Finished"
-    },16000)
+    },11000)
     // 2 seconds after the recording is finished close the window
     setTimeout(function(){
         speechTestModal.style.display = "none"
         changeCompleteState(window.speechButton, statusVar)
-    },18000)
+    },13000)
     // Change instruction back to "Don't Speak" in case the test is run again
     speechStartSymbol.style.color = "#780000";
     speechStartSymbol.innerHTML = "Do Not Speak&nbsp;&nbsp;&nbsp;4"
@@ -382,5 +416,5 @@ function processResults() {
             document.body.appendChild(script);
         })
         window.scrollTo(0,0) // Scroll to top of screen
-    },9000)
+    },35000)
 }

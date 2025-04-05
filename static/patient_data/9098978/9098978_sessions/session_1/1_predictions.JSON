@@ -1,10 +1,10 @@
 {
-    "conf_HM": "0.7966332",
-    "conf_v": "1.0",
-    "conf_RT": "0.8762777777777778",
-    "pred_HM": "1",
-    "pred_v": "1",
-    "pred_RT": "1",
-    "weighted_vote": "2.672910961733924",
-    "final_class": "1"
+    "conf_HM": 0.212,
+    "conf_v": 0.267,
+    "conf_RT": 0.239,
+    "pred_HM": 0.0,
+    "pred_v": 0.0,
+    "pred_RT": 0.0,
+    "weighted_vote": 0.0,
+    "final_class": 0.0
 }

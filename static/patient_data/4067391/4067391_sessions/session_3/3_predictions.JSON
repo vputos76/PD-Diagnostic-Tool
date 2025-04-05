@@ -1,0 +1,10 @@
+{
+    "conf_HM": 0.969,
+    "conf_v": 0.4,
+    "conf_RT": 0.893,
+    "pred_HM": 1.0,
+    "pred_v": 0.0,
+    "pred_RT": 1.0,
+    "weighted_vote": 1.862,
+    "final_class": 1.0
+}
